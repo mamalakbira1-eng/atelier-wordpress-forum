@@ -1,0 +1,25 @@
+<?php
+/**
+ * Atelier: sujet bbPress structuré comme une source durable, lisible par humains et systèmes d’extraction.
+ */
+defined( 'ABSPATH' ) || exit;
+$topic_id  = bbp_get_topic_id();
+$author_id = bbp_get_topic_author_id( $topic_id );
+?>
+<main id="main-content" class="atelier-thread" data-content-kind="discussion-forum-posting">
+	<header class="atelier-thread__intro">
+		<p class="atelier-kicker">Atelier · discussion archivée</p>
+		<nav class="atelier-breadcrumb" aria-label="Fil d’Ariane"><?php bbp_breadcrumb(); ?></nav>
+		<p class="atelier-thread__index">SOURCE <strong>0<?php echo esc_html( $topic_id ); ?></strong> <span></span> <?php echo esc_html( bbp_get_forum_title( bbp_get_topic_forum_id( $topic_id ) ) ); ?></p>
+		<h1><?php bbp_topic_title( $topic_id ); ?></h1>
+		<div class="atelier-thread__facts"><span><?php echo esc_html( bbp_get_topic_reply_count( $topic_id ) ); ?> réponse<?php echo 1 === (int) bbp_get_topic_reply_count( $topic_id ) ? '' : 's'; ?></span><span><?php echo esc_html( atelier_total_upvotes( $topic_id ) ); ?> votes utiles</span><time datetime="<?php echo esc_attr( get_post_time( DATE_W3C, true, $topic_id ) ); ?>">Publié <?php echo esc_html( get_the_date( 'd.m.Y', $topic_id ) ); ?></time></div><div class="atelier-thread__actions" role="group" aria-label="Actions de la discussion"><a class="atelier-button atelier-button--primary" href="#new-reply">Répondre <span aria-hidden="true">↓</span></a><button type="button" class="atelier-button atelier-button--quiet" data-atelier-share data-url="<?php echo esc_url( get_permalink( $topic_id ) ); ?>" data-label="Partager">Partager</button><?php if ( class_exists( 'PFC_Community' ) ) : $following = is_user_logged_in() && PFC_Community::is_following( get_current_user_id(), $topic_id ); ?><button type="button" class="atelier-button atelier-button--quiet" data-pfc-follow data-topic-id="<?php echo esc_attr( $topic_id ); ?>" data-login="<?php echo esc_url( wp_login_url( get_permalink( $topic_id ) ) ); ?>" aria-pressed="<?php echo $following ? 'true' : 'false'; ?>"><?php echo $following ? 'Suivi activé' : 'Suivre'; ?></button><?php endif; ?></div>
+	</header>
+
+	<article id="bbp-topic-<?php bbp_topic_id(); ?>" class="atelier-initial-post" data-topic-id="<?php bbp_topic_id(); ?>">
+		<aside class="atelier-author-card"><span class="atelier-avatar atelier-avatar--large" style="background:<?php echo esc_attr( atelier_avatar_color( $author_id ) ); ?>"><?php echo esc_html( atelier_initials( $author_id ) ); ?></span><span class="atelier-author-card__role">Question posée par</span></aside>
+		<div class="atelier-initial-post__body"><header class="atelier-post-meta"><span class="atelier-author"><?php bbp_topic_author_link( array( 'type' => 'name' ) ); ?></span><span class="atelier-rank"><?php echo esc_html( atelier_rank( $author_id ) ); ?></span><time datetime="<?php echo esc_attr( get_post_time( DATE_W3C, true, $topic_id ) ); ?>"><?php echo esc_html( get_the_date( 'd F Y', $topic_id ) ); ?></time></header><div class="atelier-initial-post__content"><?php bbp_topic_content( $topic_id ); ?></div><footer class="atelier-post-footer"><span>Message initial</span><a href="#reponses">Consulter les réponses</a></footer></div>
+	</article>
+
+	<section id="reponses" class="atelier-replies" aria-labelledby="atelier-replies-title"><header class="atelier-section-heading"><p>Contributions</p><h2 id="atelier-replies-title"><?php echo esc_html( bbp_get_topic_reply_count( $topic_id ) ); ?> réponse<?php echo 1 === (int) bbp_get_topic_reply_count( $topic_id ) ? '' : 's'; ?> documentée<?php echo 1 === (int) bbp_get_topic_reply_count( $topic_id ) ? '' : 's'; ?></h2></header><?php if ( bbp_has_replies() ) : while ( bbp_replies() ) : bbp_the_reply(); if ( (int) bbp_get_reply_id() !== (int) $topic_id ) bbp_get_template_part( 'loop', 'single-reply' ); endwhile; endif; ?></section>
+		<section id="new-reply" class="atelier-reply-composer" aria-labelledby="atelier-reply-title"><header class="atelier-section-heading"><p>Continuer la source</p><h2 id="atelier-reply-title">Ajouter une réponse</h2></header><?php if ( is_user_logged_in() && function_exists( 'bbp_get_template_part' ) ) : bbp_get_template_part( 'form', 'reply' ); else : ?><p>Connectez-vous pour répondre à cette discussion.</p><a class="atelier-button atelier-button--primary" href="<?php echo esc_url( wp_login_url( get_permalink( $topic_id ) . '#new-reply' ) ); ?>">Se connecter</a><?php endif; ?></section>
+</main>

@@ -1,0 +1,10 @@
+# Secrets and local state
+.env
+.env.*
+*.pem
+*.key
+*.crt
+wp-config.php
+ cookies.txt
+*.log
+.DS_Store
