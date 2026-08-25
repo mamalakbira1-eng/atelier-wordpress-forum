@@ -31,3 +31,11 @@ Le bouton de suivi a été activé sur le sujet de recette et conserve l’état
 Le dépôt public a été mis à jour sur `main` avec le commit `b00500b` : `Release Atelier 0.4.26 React parity and final validation`.
 
 Le dépôt public exclut les identifiants staging et les mots de passe. Les fixtures utilisent des adresses `example.test` et l’archive de recette a été reconstruite sans colonne `password_hash`.
+
+## Correctif Message initial — 0.4.27
+
+Une première réinstallation de l’archive 0.4.26 n’a pas changé le thème actif : WordPress conservait une ancienne copie `atelier-0.4.4`. Pour éviter toute ambiguïté de dossier et de cache, le correctif a été empaqueté sous le nouveau dossier `atelier-0427`, installé puis activé explicitement depuis la grille des thèmes WordPress.
+
+La vérification finale confirme la feuille `https://springgreen-panther-771782.hostingersite.com/wp-content/themes/atelier-0427/style.css?ver=1787691011`. Sur le sujet français, le rail contient uniquement `TT / QUESTION POSÉE PAR`, tandis que le corps contient la séquence `Message initial → Tara Thomas / Éclaireur / 27 mai 2024 → texte`. Sur le sujet arabe, le rail contient `AA / QUESTION POSÉE PAR`, le corps contient `Aline Alvarez / Contributrice / 10 juin 2024`, le texte conserve `dir="rtl"` et la police calculée est `Noto Naskh Arabic`.
+
+L’archive installable de cette correction est `release/atelier-0.4.27-initial-author.zip`.
