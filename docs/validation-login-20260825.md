@@ -34,3 +34,11 @@ Après un remplacement de diagnostic sans hooks login dans le code local, la ré
 - Après réactivation de Premium Forum Core, la barre affiche bien Répondre, Partager, Voter utile et Suivre ; le sujet affiche 42 votes et les réponses affichent 18, 27 et 11 votes utiles.
 - LiteSpeed Cache, Hostinger Tools et Hostinger Reach ont été restaurés. Hostinger Easy Onboarding reste désactivée comme avant le diagnostic.
 - Le lien direct arabe peut renvoyer une ancienne 404 mise en cache ; le lien canonique ouvert depuis la liste publique fonctionne et le cache LiteSpeed a été purgé lors des réactivations.
+
+## Validation parité React 0.4.26 — 25 août 2026
+
+URL contrôlée : https://springgreen-panther-771782.hostingersite.com/forums/topic/regles-repondre-forum-metier/?atelier_validation=react_parity_0426
+
+Le thème `atelier-0426` a été installé puis activé. WordPress a confirmé le remplacement et LiteSpeed a affiché la purge des caches. La page publique expose les quatre actions dans l’ordre de la preview React : Répondre, Suivre, Partager, Enregistrer. Le message initial affiche séparément le repère « Message initial », l’auteur et le rang, la date, le contenu, les upvotes et la source stable. La colonne droite expose la carte Lecture claire, les repères du sujet, la figure, les sujets à poursuivre avec liens bbPress et la carte Collection.
+
+Le panneau « Lecture claire » n’est pas un sujet : il explique la structure éditoriale et lisible par machine du sujet, puis son bouton copie le lien canonique. Les sujets de la section « À poursuivre » pointent vers leurs permaliens bbPress. Le titre arabe conserve Noto Naskh Arabic mais son plafond a été réduit dans la version 0.4.26.

@@ -37,9 +37,22 @@
 
   document.querySelectorAll('[data-atelier-share]').forEach((button) => button.addEventListener('click', async () => {
     const url = button.dataset.url || window.location.href;
-    try { if (navigator.share) await navigator.share({ title: document.title, url }); else await navigator.clipboard.writeText(url); button.textContent = 'Lien copié'; } catch (_) { button.textContent = 'Lien prêt à partager'; }
-    window.setTimeout(() => { button.textContent = button.dataset.label || 'Partager'; }, 1800);
+    const label = button.querySelector('[data-share-label]');
+    const original = button.dataset.label || 'Partager';
+    try { if (navigator.share) await navigator.share({ title: document.title, url }); else await navigator.clipboard.writeText(url); if (label) label.textContent = 'Lien copié'; }
+    catch (_) { if (label) label.textContent = 'Lien prêt à partager'; }
+    window.setTimeout(() => { if (label) label.textContent = original; }, 1800);
   }));
+
+  document.querySelectorAll('[data-atelier-save]').forEach((button) => {
+    const key = button.dataset.saveKey || `atelier-save-${window.location.pathname}`;
+    const label = button.querySelector('[data-save-label]');
+    const sync = (saved) => { button.classList.toggle('is-active', saved); button.setAttribute('aria-pressed', String(saved)); if (label) label.textContent = saved ? 'Enregistré' : 'Enregistrer'; };
+    let saved = false;
+    try { saved = window.localStorage.getItem(key) === '1'; } catch (_) {}
+    sync(saved);
+    button.addEventListener('click', () => { saved = !saved; sync(saved); try { window.localStorage.setItem(key, saved ? '1' : '0'); } catch (_) {} });
+  });
 
   if (community) {
     let communityNonce = community.nonce || '';
@@ -60,7 +73,7 @@
     document.querySelectorAll('[data-pfc-follow]').forEach((button) => button.addEventListener('click', async () => {
       if (!community.loggedIn) { window.location.href = button.dataset.login || '/wp-login.php'; return; }
       button.disabled = true;
-      try { await refreshNonce(); const payload = await communityRequest({ action: 'pfc_toggle_follow', topic_id: button.dataset.topicId }); if (!payload.success) throw new Error('follow'); button.textContent = 'Suivre'; button.classList.toggle('is-active', Boolean(payload.data.following)); button.setAttribute('aria-pressed', String(payload.data.following)); } catch (_) { button.textContent = 'Réessayer'; } finally { button.disabled = false; }
+      try { await refreshNonce(); const payload = await communityRequest({ action: 'pfc_toggle_follow', topic_id: button.dataset.topicId }); if (!payload.success) throw new Error('follow'); const followLabel = button.querySelector('[data-follow-label]'); if (followLabel) followLabel.textContent = payload.data.following ? 'Vous suivez' : 'Suivre'; button.classList.toggle('is-active', Boolean(payload.data.following)); button.setAttribute('aria-pressed', String(payload.data.following)); } catch (_) { const followLabel = button.querySelector('[data-follow-label]'); if (followLabel) followLabel.textContent = 'Réessayer'; else button.textContent = 'Réessayer'; } finally { button.disabled = false; }
     }));
     document.querySelectorAll('[data-pfc-mark-read]').forEach((button) => button.addEventListener('click', async () => {
       button.disabled = true;

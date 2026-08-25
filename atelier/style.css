@@ -1,6 +1,6 @@
 /* Theme Name: Atelier
  * Description: Thème premium LLM-first pour bbPress.
- * Version: 0.4.23
+ * Version: 0.4.26
  */
 /* Atelier — cadrage prioritaire du visuel LCP : le papier et le ruban, jamais une plage sombre vide. */
 body .atelier-home__hero-art img{object-position:100% center}
@@ -168,3 +168,79 @@ body .atelier-header__search-wrap{position:relative;flex:none}body .atelier-head
 .atelier-thread__actions [data-pfc-follow]:hover,.atelier-thread__actions [data-pfc-follow].is-active{background:var(--atelier-ink);border-color:var(--atelier-ink);color:#fffdfa}
 .atelier-thread__actions .atelier-vote-button--topic.is-active{background:var(--atelier-faint)!important;border-color:var(--atelier-vermilion)!important;color:var(--atelier-vermilion)!important}
 @media(max-width:700px){.atelier-thread__actions .atelier-button{min-height:48px;padding-inline:13px;font-size:10px}.atelier-thread__actions .atelier-vote-button--topic{min-width:0}}
+
+
+/* Atelier — parité React v3 : une seule hiérarchie finale pour éviter les rectangles bbPress et les overrides contradictoires. */
+.atelier-thread__deck{max-width:680px;margin:21px 0 0;color:var(--atelier-soft);font-size:16px;line-height:1.72}
+.atelier-thread h1[dir="rtl"]{max-width:680px;font-size:clamp(2.55rem,4.6vw,4.25rem)!important;line-height:1.16!important;letter-spacing:0!important;font-weight:700!important}
+.atelier-thread__actions{align-items:stretch!important;gap:8px!important;margin-top:25px!important}
+.atelier-thread__actions .atelier-button{min-height:37px!important;height:37px!important;padding:0 12px!important;border:1px solid var(--atelier-line)!important;background:transparent!important;color:var(--atelier-ink)!important;font-size:11px!important;font-weight:800!important;letter-spacing:0!important;gap:7px!important;transition:background .16s ease,border-color .16s ease,color .16s ease,transform .16s ease!important}
+.atelier-thread__actions .atelier-button svg{width:16px!important;height:16px!important;flex:0 0 16px!important}
+.atelier-thread__actions .atelier-button:hover,.atelier-thread__actions .atelier-button:focus-visible{border-color:var(--atelier-vermilion)!important;background:transparent!important;color:var(--atelier-vermilion)!important;transform:none!important}
+.atelier-thread__actions .atelier-button:active{transform:scale(.97)!important}
+.atelier-thread__actions .atelier-button--reply{border-color:var(--atelier-vermilion)!important;color:var(--atelier-vermilion)!important}
+.atelier-thread__actions .atelier-button--reply:hover,.atelier-thread__actions .atelier-button--reply:focus-visible{background:#fce5df!important;color:#a83a29!important}
+.atelier-thread__actions .atelier-button--follow{border-color:var(--atelier-ink)!important;background:var(--atelier-ink)!important;color:#fffdfa!important}
+.atelier-thread__actions .atelier-button--follow:hover,.atelier-thread__actions .atelier-button--follow:focus-visible{border-color:var(--atelier-vermilion)!important;background:var(--atelier-vermilion)!important;color:#fffdfa!important}
+.atelier-thread__actions .atelier-button--follow.is-active{border-color:var(--atelier-ink)!important;background:var(--atelier-ink)!important;color:#fffdfa!important}
+.atelier-thread__actions .atelier-button--save.is-active{border-color:var(--atelier-vermilion)!important;background:#fce5df!important;color:#a83a29!important}
+.atelier-thread__actions .atelier-button::before{content:none!important}
+.atelier-initial-post__body{min-width:0}
+.atelier-initial-post__label{margin:0 0 24px;color:var(--atelier-soft);font-size:10px;font-weight:900;letter-spacing:.13em;text-transform:uppercase}
+.atelier-initial-post .atelier-post-meta{justify-content:space-between;gap:18px;margin-bottom:25px}
+.atelier-initial-post .atelier-post-meta time{margin-left:auto;color:var(--atelier-soft);font-size:10px}
+.atelier-initial-post__content{max-width:680px;color:#33404a;font-size:15px;line-height:1.85}
+.atelier-post-footer{align-items:center!important;margin-top:24px!important;padding-top:14px!important}
+.atelier-topic-upvotes,.atelier-source-note{display:inline-flex;align-items:center;gap:6px;color:var(--atelier-soft);font-size:10px;font-weight:800}
+.atelier-topic-upvotes svg,.atelier-source-note svg{width:16px;height:16px;flex:0 0 16px}
+.atelier-topic-upvotes strong{color:var(--atelier-ink);font-size:13px}
+.atelier-source-note{margin-left:auto}
+.atelier-source-note button{padding:0;border:0;border-bottom:1px solid var(--atelier-line);background:transparent;color:var(--atelier-ink);font:inherit;font-weight:900;cursor:pointer}
+.atelier-source-note button:hover{border-color:var(--atelier-vermilion);color:var(--atelier-vermilion)}
+.atelier-thread__aside{padding-top:55px}
+.atelier-reading-card{padding:21px!important}
+.atelier-reading-card h2{font-size:27px!important;line-height:1!important}
+.atelier-reading-card p{font-size:12px!important;line-height:1.65!important}
+.atelier-signal-copy{position:relative;z-index:1;display:inline-flex;align-items:center;gap:6px;padding:0;border:0;border-bottom:1px solid var(--atelier-ink);background:transparent;color:var(--atelier-ink);font:inherit;font-size:10px;font-weight:900;cursor:pointer}
+.atelier-signal-copy svg{width:16px;height:16px;flex:0 0 16px}
+.atelier-signal-copy:hover{border-color:var(--atelier-vermilion);color:var(--atelier-vermilion)}
+.atelier-thread__stats{margin-top:15px!important;border:1px solid var(--atelier-line)!important;padding:18px 16px 17px}
+.atelier-thread__stats div{padding:0 8px!important;border-left:2px solid var(--atelier-vermilion)!important}
+.atelier-thread__stats div+div{border-left:2px solid var(--atelier-vermilion)!important}
+.atelier-thread__stats span{font-size:25px!important}
+.atelier-thread__stats small{font-size:9px!important}
+.atelier-thread__figure{margin-top:13px!important}
+.atelier-thread__figure img{height:190px!important}
+.atelier-thread__figure figcaption{padding:12px 0 0!important;font-size:16px!important;line-height:1.15!important}
+.atelier-related{margin-top:27px!important;border-top:1px solid var(--atelier-ink)}
+.atelier-related .atelier-kicker{margin:11px 0 0}
+.atelier-related ol{border-top:0!important}
+.atelier-related li{padding:0!important}
+.atelier-related li>a{display:grid;grid-template-columns:22px minmax(0,1fr) 14px;align-items:start;gap:7px;padding:12px 0;border-top:1px solid var(--atelier-line);font-size:11px;font-weight:800;line-height:1.4}
+.atelier-related__number{margin-top:1px!important;color:var(--atelier-vermilion)!important;font-size:9px!important;font-weight:900!important}
+.atelier-related__copy{display:block!important;margin:0!important;color:var(--atelier-ink)!important}
+.atelier-related__copy strong{display:block;font-size:11px;font-weight:800}
+.atelier-related__copy small{display:flex!important;align-items:center;gap:4px;margin-top:5px!important;color:var(--atelier-soft)!important;font-size:9px!important;font-weight:700!important}
+.atelier-related__copy small svg{width:12px;height:12px}
+.atelier-related__arrow{margin:0!important;color:var(--atelier-ink)!important;font-size:20px!important;font-weight:400!important;line-height:.8!important}
+.atelier-related li>a:hover .atelier-related__copy strong,.atelier-related li>a:hover .atelier-related__arrow{color:var(--atelier-vermilion)!important}
+.atelier-collection-card{display:grid!important;grid-template-columns:88px minmax(0,1fr)!important;gap:13px!important;margin-top:24px!important;padding:10px!important;background:#fffdfa!important;border:1px solid var(--atelier-line)!important;color:var(--atelier-ink)!important}
+.atelier-collection-card::before{content:"";display:block;grid-row:1 / span 3;width:88px;min-height:88px;background:url('assets/images/atelier-knowledge-map.webp') center/cover no-repeat}
+.atelier-collection-card span,.atelier-collection-card strong,.atelier-collection-card small{grid-column:2}
+.atelier-collection-card span{margin-top:3px;color:var(--atelier-vermilion)!important;font-size:9px!important}
+.atelier-collection-card strong{margin-top:0!important;font-size:21px!important;line-height:1.04!important}
+.atelier-collection-card small{margin-top:8px!important;color:var(--atelier-ink)!important;font-size:9px!important;font-weight:900!important;text-decoration:underline;text-underline-offset:3px}
+.atelier-collection-card:hover strong,.atelier-collection-card:hover small{color:var(--atelier-vermilion)!important}
+@media(max-width:1050px){.atelier-thread__aside{padding-top:0}.atelier-thread__deck{font-size:15px}}
+@media(max-width:700px){.atelier-thread h1[dir="rtl"]{font-size:clamp(2.15rem,9.5vw,3.25rem)!important;line-height:1.2!important}.atelier-thread__deck{font-size:14px;line-height:1.65}.atelier-thread__actions{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:8px!important}.atelier-thread__actions .atelier-button{width:100%!important}.atelier-initial-post .atelier-post-meta{align-items:flex-start;flex-direction:column}.atelier-initial-post .atelier-post-meta time{margin-left:0}.atelier-post-footer{align-items:flex-start!important;flex-direction:column!important;gap:12px!important}.atelier-source-note{margin-left:0}.atelier-collection-card{grid-template-columns:76px minmax(0,1fr)!important}.atelier-collection-card::before{width:76px;min-height:76px}}
+
+
+/* Atelier — ordre React verrouillé : Répondre, Suivre, Partager, Enregistrer. */
+.atelier-thread__actions .atelier-button--reply{order:1!important}
+.atelier-thread__actions .atelier-button--follow{order:2!important}
+.atelier-thread__actions .atelier-button--share{order:3!important}
+.atelier-thread__actions .atelier-button--save{order:4!important}
+.atelier-thread__actions .atelier-button--follow svg{stroke-width:1.8}
+.atelier-thread__actions .atelier-button--save svg{stroke-width:1.6}
+.atelier-thread__figure img{height:auto!important;aspect-ratio:1.15/1!important;object-fit:cover!important}
+.atelier-collection-card::before{background:url('assets/images/atelier-knowledge-map.webp') center/cover no-repeat!important}
