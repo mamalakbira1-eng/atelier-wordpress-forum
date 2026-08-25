@@ -66,5 +66,23 @@
       button.disabled = true;
       try { await refreshNonce(); const payload = await communityRequest({ action: 'pfc_mark_notifications_read' }); if (payload.success) { document.querySelectorAll('.atelier-notifications .is-unread').forEach((item) => item.classList.remove('is-unread')); button.remove(); document.querySelectorAll('.atelier-notifications__count').forEach((count) => count.remove()); } } finally { button.disabled = false; }
     }));
+    document.querySelectorAll('[data-pfc-vote]').forEach((button) => button.addEventListener('click', async () => {
+      if (!community.loggedIn) { window.location.href = button.dataset.login || '/wp-login.php'; return; }
+      button.disabled = true;
+      try {
+        await refreshNonce();
+        const payload = await communityRequest({ action: 'pfc_toggle_vote', object_id: button.dataset.objectId });
+        if (!payload.success) throw new Error(payload.data?.message || 'vote');
+        button.classList.toggle('is-active', Boolean(payload.data.voted));
+        button.setAttribute('aria-pressed', String(Boolean(payload.data.voted)));
+        const label = button.querySelector('[data-pfc-vote-label]');
+        const count = button.querySelector('[data-pfc-vote-count]');
+        if (label) label.textContent = payload.data.voted ? 'Vote ajouté' : 'Voter utile';
+        if (count) count.textContent = String(payload.data.count);
+      } catch (error) {
+        const label = button.querySelector('[data-pfc-vote-label]');
+        if (label && error?.message) label.textContent = error.message;
+      } finally { button.disabled = false; }
+    }));
   }
 })();

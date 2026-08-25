@@ -20,7 +20,7 @@ Le dépôt est destiné à être public. Les mots de passe, cookies, tokens, cl�
 
 ## Installation
 
-Installer bbPress, puis téléverser `release/premium-forum-core.zip` dans Extensions → Ajouter une extension. Téléverser ensuite `release/atelier.zip` dans Apparence → Thèmes → Ajouter un thème, puis activer Atelier. Vérifier les permaliens et purger le cache LiteSpeed après activation.
+Installer bbPress, puis téléverser `release/premium-forum-core-0.3.0.zip` dans Extensions → Ajouter une extension. Téléverser ensuite `release/atelier-0.4.5.zip` dans Apparence → Thèmes → Ajouter un thème, puis activer Atelier. Vérifier les permaliens et purger le cache LiteSpeed après activation.
 
 L’import de recette se fait depuis Premium Forum → Import CSV. Commencer par un dry run, vérifier le mapping, puis lancer l’import. Les fixtures sont un jeu de démonstration ; ne pas les importer sur un site de production sans sauvegarde et sans validation éditoriale.
 

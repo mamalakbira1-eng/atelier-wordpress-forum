@@ -4,7 +4,8 @@ defined( 'ABSPATH' ) || exit;
 $forum_id = bbp_get_forum_id();
 ?>
 <main class="atelier-forum" id="main-content" data-content-kind="forum-category">
-	<a class="atelier-backlink" href="<?php echo esc_url( function_exists( 'atelier_spaces_url' ) ? atelier_spaces_url() : atelier_home_section_url( 'espaces' ) ); ?>">Tous les espaces</a>
+		<nav class="atelier-breadcrumb" aria-label="Fil d’Ariane"><?php bbp_breadcrumb(); ?></nav>
+		<a class="atelier-backlink" href="<?php echo esc_url( function_exists( 'atelier_spaces_url' ) ? atelier_spaces_url() : atelier_home_section_url( 'espaces' ) ); ?>">Tous les espaces</a>
 	<header class="atelier-forum__hero">
 		<p class="atelier-kicker">Dossier de discussion</p>
 		<p class="atelier-forum__index">CATÉGORIE <strong>0<?php echo esc_html( $forum_id ); ?></strong><span></span> Forum public</p>

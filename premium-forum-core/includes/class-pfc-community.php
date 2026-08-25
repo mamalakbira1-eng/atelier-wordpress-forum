@@ -1,7 +1,7 @@
 <?php
 /**
  * PFC Community — notifications internes, suivi des sujets et statistiques membres.
- * Les votes importés restent des compteurs agrégés ; aucune identité de votant n'est exposée.
+ * Les votes importés restent des compteurs agrégés ; les votes natifs sont dédupliqués par membre et objet.
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -17,9 +17,10 @@ final class PFC_Community {
 		add_action( 'personal_options_update', array( __CLASS__, 'save_profile_field' ) );
 		add_action( 'edit_user_profile_update', array( __CLASS__, 'save_profile_field' ) );
 		add_action( 'bbp_new_reply', array( __CLASS__, 'on_new_reply' ), 10, 5 );
-			add_action( 'wp_ajax_pfc_community_nonce', array( __CLASS__, 'ajax_community_nonce' ) );
-			add_action( 'wp_ajax_pfc_toggle_follow', array( __CLASS__, 'ajax_toggle_follow' ) );
-			add_action( 'wp_ajax_pfc_mark_notifications_read', array( __CLASS__, 'ajax_mark_notifications_read' ) );
+		add_action( 'wp_ajax_pfc_community_nonce', array( __CLASS__, 'ajax_community_nonce' ) );
+		add_action( 'wp_ajax_pfc_toggle_follow', array( __CLASS__, 'ajax_toggle_follow' ) );
+		add_action( 'wp_ajax_pfc_mark_notifications_read', array( __CLASS__, 'ajax_mark_notifications_read' ) );
+		add_action( 'wp_ajax_pfc_toggle_vote', array( __CLASS__, 'ajax_toggle_vote' ) );
 	}
 
 	public static function register_svip_role(): void {
@@ -54,9 +55,10 @@ final class PFC_Community {
 	public static function ensure_schema(): void {
 		global $wpdb;
 		require_once ABSPATH . 'wp-admin/includes/upgrade.php';
-		$charset = $wpdb->get_charset_collate();
+		$charset       = $wpdb->get_charset_collate();
 		$notifications = self::table( 'notifications' );
-		$follows = self::table( 'follows' );
+		$follows       = self::table( 'follows' );
+		$votes         = self::table( 'votes' );
 		dbDelta( "CREATE TABLE {$notifications} (
 			id bigint(20) unsigned NOT NULL AUTO_INCREMENT,
 			recipient_id bigint(20) unsigned NOT NULL,
@@ -81,6 +83,15 @@ final class PFC_Community {
 			UNIQUE KEY user_topic (user_id,topic_id),
 			KEY topic_id (topic_id)
 		) {$charset};" );
+		dbDelta( "CREATE TABLE {$votes} (
+			id bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+			user_id bigint(20) unsigned NOT NULL,
+			object_id bigint(20) unsigned NOT NULL,
+			created_at datetime NOT NULL,
+			PRIMARY KEY  (id),
+			UNIQUE KEY user_object (user_id,object_id),
+			KEY object_id (object_id)
+		) {$charset};" );
 	}
 
 	public static function is_following( int $user_id, int $topic_id ): bool {
@@ -98,6 +109,16 @@ final class PFC_Community {
 		return $wpdb->get_results( $wpdb->prepare( 'SELECT * FROM ' . self::table( 'notifications' ) . ' WHERE recipient_id=%d ORDER BY created_at DESC, id DESC LIMIT %d', $user_id, max( 1, min( 50, $limit ) ) ) ) ?: array();
 	}
 
+	public static function native_upvotes( int $post_id ): int {
+		global $wpdb;
+		return (int) $wpdb->get_var( $wpdb->prepare( 'SELECT COUNT(*) FROM ' . self::table( 'votes' ) . ' WHERE object_id=%d', $post_id ) );
+	}
+
+	public static function has_voted( int $user_id, int $post_id ): bool {
+		global $wpdb;
+		return (bool) $wpdb->get_var( $wpdb->prepare( 'SELECT id FROM ' . self::table( 'votes' ) . ' WHERE user_id=%d AND object_id=%d LIMIT 1', $user_id, $post_id ) );
+	}
+
 	public static function received_upvotes( int $user_id ): int {
 		$ids = get_posts( array(
 			'post_type'      => array( 'topic', 'reply' ),
@@ -111,6 +132,7 @@ final class PFC_Community {
 		foreach ( $ids as $id ) {
 			$total += absint( get_post_meta( $id, 'pfc_legacy_upvotes_count', true ) );
 			$total += absint( get_post_meta( $id, 'pfc_native_upvotes_count', true ) );
+			$total += self::native_upvotes( (int) $id );
 		}
 		return $total;
 	}
@@ -156,14 +178,14 @@ final class PFC_Community {
 		}
 	}
 
-		public static function ajax_community_nonce(): void {
-			if ( ! is_user_logged_in() ) {
-				wp_send_json_error( array( 'message' => 'Connexion requise.' ), 401 );
-			}
-			wp_send_json_success( array( 'nonce' => wp_create_nonce( 'pfc_community' ) ) );
+	public static function ajax_community_nonce(): void {
+		if ( ! is_user_logged_in() ) {
+			wp_send_json_error( array( 'message' => 'Connexion requise.' ), 401 );
 		}
+		wp_send_json_success( array( 'nonce' => wp_create_nonce( 'pfc_community' ) ) );
+	}
 
-		public static function ajax_toggle_follow(): void {
+	public static function ajax_toggle_follow(): void {
 		if ( ! is_user_logged_in() ) {
 			wp_send_json_error( array( 'message' => 'Connexion requise.' ), 401 );
 		}
@@ -181,6 +203,33 @@ final class PFC_Community {
 		}
 		$wpdb->insert( $table, array( 'user_id' => $user_id, 'topic_id' => $topic_id, 'created_at' => current_time( 'mysql', true ) ), array( '%d', '%d', '%s' ) );
 		wp_send_json_success( array( 'following' => true, 'label' => 'Suivi activé' ) );
+	}
+
+	public static function ajax_toggle_vote(): void {
+		if ( ! is_user_logged_in() ) {
+			wp_send_json_error( array( 'message' => 'Connexion requise.' ), 401 );
+		}
+		check_ajax_referer( 'pfc_community', 'nonce' );
+		$post_id = absint( $_POST['object_id'] ?? 0 );
+		$post = $post_id ? get_post( $post_id ) : null;
+		if ( ! $post || ! in_array( $post->post_type, array( 'topic', 'reply' ), true ) || 'publish' !== $post->post_status ) {
+			wp_send_json_error( array( 'message' => 'Contribution introuvable.' ), 404 );
+		}
+		$user_id = get_current_user_id();
+		if ( (int) $post->post_author === $user_id ) {
+			wp_send_json_error( array( 'message' => 'Vous ne pouvez pas voter pour votre propre contribution.' ), 403 );
+		}
+		global $wpdb;
+		$table = self::table( 'votes' );
+		if ( self::has_voted( $user_id, $post_id ) ) {
+			$wpdb->delete( $table, array( 'user_id' => $user_id, 'object_id' => $post_id ), array( '%d', '%d' ) );
+			$active = false;
+		} else {
+			$wpdb->insert( $table, array( 'user_id' => $user_id, 'object_id' => $post_id, 'created_at' => current_time( 'mysql', true ) ), array( '%d', '%d', '%s' ) );
+			$active = true;
+		}
+		$count = absint( get_post_meta( $post_id, 'pfc_legacy_upvotes_count', true ) ) + absint( get_post_meta( $post_id, 'pfc_native_upvotes_count', true ) ) + self::native_upvotes( $post_id );
+		wp_send_json_success( array( 'voted' => $active, 'count' => $count, 'label' => $active ? 'Vote utile ajouté' : 'Voter utile' ) );
 	}
 
 	public static function ajax_mark_notifications_read(): void {

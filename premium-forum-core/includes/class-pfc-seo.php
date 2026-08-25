@@ -6,11 +6,31 @@ final class PFC_SEO {
 		add_filter( 'the_content', array( __CLASS__, 'ugc_links' ), 30 );
 		/* bbPress initialise sa boucle de réponses pendant le rendu du template :
 		 * le JSON-LD est donc émis avant </body>, une position valide pour schema.org. */
-		add_action( 'wp_footer', array( __CLASS__, 'topic_schema' ), 20 );
-		add_filter( 'document_title_parts', array( __CLASS__, 'title' ) );
+			add_action( 'wp_head', array( __CLASS__, 'meta_description' ), 1 );
+			add_action( 'wp_footer', array( __CLASS__, 'topic_schema' ), 20 );
+			add_action( 'wp_footer', array( __CLASS__, 'breadcrumb_schema' ), 21 );
+			add_filter( 'document_title_parts', array( __CLASS__, 'title' ) );
 	}
 	public static function ugc_links( string $content ): string { return function_exists( 'wp_rel_ugc' ) ? wp_rel_ugc( $content ) : $content; }
-	public static function title( array $parts ): array { if ( function_exists( 'bbp_is_single_topic' ) && bbp_is_single_topic() ) { $parts['title'] = get_the_title() . ' — ' . bbp_get_forum_title( bbp_get_topic_forum_id() ); } return $parts; }
+			public static function title( array $parts ): array { if ( function_exists( 'bbp_is_single_topic' ) && bbp_is_single_topic() ) { $parts['title'] = get_the_title() . ' — ' . bbp_get_forum_title( bbp_get_topic_forum_id() ); } return $parts; }
+		public static function meta_description(): void {
+			$description = '';
+			if ( function_exists( 'bbp_is_single_topic' ) && bbp_is_single_topic() ) {
+				$topic = get_queried_object();
+				$description = $topic instanceof WP_Post ? wp_trim_words( wp_strip_all_tags( $topic->post_content ), 28, '…' ) : '';
+			} elseif ( function_exists( 'bbp_is_single_forum' ) && bbp_is_single_forum() ) {
+				$forum_id = bbp_get_forum_id();
+				$description = wp_trim_words( wp_strip_all_tags( bbp_get_forum_content( $forum_id ) ?: bbp_get_forum_title( $forum_id ) ), 28, '…' );
+			} elseif ( is_front_page() || is_home() ) {
+				$description = 'Atelier transforme les discussions exigeantes en ressources vivantes, sourcées et partageables.';
+			} elseif ( is_page() ) {
+				$description = wp_trim_words( wp_strip_all_tags( get_post_field( 'post_content', get_queried_object_id() ) ?: get_the_title() ), 28, '…' );
+			}
+			if ( $description ) {
+				echo '<meta name="description" content="' . esc_attr( $description ) . '">' . "\n";
+			}
+		}
+
 	public static function topic_schema(): void {
 		if ( ! function_exists( 'bbp_is_single_topic' ) || ! bbp_is_single_topic() ) return;
 		$topic = get_queried_object(); if ( ! $topic instanceof WP_Post ) return;
@@ -33,7 +53,20 @@ final class PFC_SEO {
 		}
 		echo "\n<script type=\"application/ld+json\">" . wp_json_encode( $data, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES ) . "</script>\n";
 	}
-	private static function historical_or_modified( WP_Post $post ): string {
+		public static function breadcrumb_schema(): void {
+			if ( ! function_exists( 'bbp_is_single_topic' ) || ! function_exists( 'bbp_is_single_forum' ) || ( ! bbp_is_single_topic() && ! bbp_is_single_forum() ) ) return;
+			$items = array( array( '@type' => 'ListItem', 'position' => 1, 'name' => get_bloginfo( 'name' ), 'item' => home_url( '/' ) ) );
+			if ( bbp_is_single_topic() ) {
+				$forum_id = bbp_get_topic_forum_id();
+				$items[] = array( '@type' => 'ListItem', 'position' => 2, 'name' => bbp_get_forum_title( $forum_id ), 'item' => bbp_get_forum_permalink( $forum_id ) );
+				$items[] = array( '@type' => 'ListItem', 'position' => 3, 'name' => get_the_title(), 'item' => get_permalink() );
+			} else {
+				$items[] = array( '@type' => 'ListItem', 'position' => 2, 'name' => 'Espaces', 'item' => function_exists( 'atelier_spaces_url' ) ? atelier_spaces_url() : home_url( '/' ) );
+				$items[] = array( '@type' => 'ListItem', 'position' => 3, 'name' => bbp_get_forum_title(), 'item' => bbp_get_forum_permalink() );
+			}
+			echo "\n<script type=\"application/ld+json\">" . wp_json_encode( array( '@context' => 'https://schema.org', '@type' => 'BreadcrumbList', 'itemListElement' => $items ), JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES ) . "</script>\n";
+		}
+		private static function historical_or_modified( WP_Post $post ): string {
 		$historical = get_post_meta( $post->ID, 'pfc_historical_updated_at', true );
 		if ( $historical ) {
 			try { return ( new DateTimeImmutable( $historical, wp_timezone() ) )->format( DATE_W3C ); } catch ( Exception $exception ) { /* Retombe sur WordPress. */ }
