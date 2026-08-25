@@ -38,7 +38,7 @@ function atelier_content_dir( string $text ): string { return atelier_contains_a
 add_filter( 'body_class', static function( array $classes ): array { if ( is_singular() ) { $post = get_queried_object(); if ( $post instanceof WP_Post && atelier_contains_arabic( (string) $post->post_title . ' ' . (string) $post->post_content ) ) $classes[] = 'atelier-has-arabic'; } return $classes; } );
 /** Atelier — connexion cohérente avec le site public, y compris lorsque WordPress affiche directement wp-login.php. */
 
-add_action( 'login_enqueue_scripts', static function(): void { wp_enqueue_style( 'atelier-login', get_stylesheet_directory_uri() . '/login.css', array(), wp_get_theme()->get( 'Version' ) ); } );
+add_action( 'login_enqueue_scripts', static function(): void { $login_file = get_stylesheet_directory() . '/login.css'; $login_version = file_exists( $login_file ) ? (string) filemtime( $login_file ) : wp_get_theme()->get( 'Version' ); wp_enqueue_style( 'atelier-login', get_stylesheet_directory_uri() . '/login.css', array(), $login_version ); } );
 add_filter( 'login_headerurl', static function(): string { return home_url( '/' ); } );
 add_filter( 'login_headertext', static function(): string { return 'Atelier — Forum de connaissances'; } );
 add_filter( 'login_display_language_dropdown', '__return_false' );

@@ -142,18 +142,34 @@ final class PFC_Community {
 			return;
 		}
 		global $wpdb;
-		$wpdb->insert( self::table( 'notifications' ), array(
-			'recipient_id' => $recipient_id,
-			'actor_id'     => $actor_id,
-			'object_id'    => $object_id,
-			'topic_id'     => $topic_id,
-			'type'         => $type,
-			'message'      => $message,
-			'url'          => $url,
-			'is_read'      => 0,
-			'created_at'   => current_time( 'mysql', true ),
-		), array( '%d', '%d', '%d', '%d', '%s', '%s', '%s', '%d', '%s' ) );
-	}
+			$wpdb->insert( self::table( 'notifications' ), array(
+				'recipient_id' => $recipient_id,
+				'actor_id'     => $actor_id,
+				'object_id'    => $object_id,
+				'topic_id'     => $topic_id,
+				'type'         => $type,
+				'message'      => $message,
+				'url'          => $url,
+				'is_read'      => 0,
+				'created_at'   => current_time( 'mysql', true ),
+			), array( '%d', '%d', '%d', '%d', '%s', '%s', '%s', '%d', '%s' ) );
+			self::send_email( $recipient_id, $type, $message, $url );
+		}
+
+		private static function send_email( int $recipient_id, string $type, string $message, string $url ): void {
+			$recipient = get_userdata( $recipient_id );
+			if ( ! $recipient || ! is_email( $recipient->user_email ) || '1' === (string) get_user_meta( $recipient_id, 'pfc_disable_email_notifications', true ) ) {
+				return;
+			}
+			$subjects = array(
+				'reply_to_topic'     => 'Atelier — nouvelle réponse à votre discussion',
+				'reply_to_reply'     => 'Atelier — nouvelle réponse à votre contribution',
+				'followed_topic_reply' => 'Atelier — nouvelle réponse dans une discussion suivie',
+			);
+			$subject = $subjects[ $type ] ?? 'Atelier — nouvelle notification';
+			$body = '<p>' . esc_html( $message ) . '</p><p><a href="' . esc_url( $url ) . '">Lire la contribution dans Atelier</a></p><p style="color:#777;font-size:12px">Vous pouvez désactiver ces e-mails depuis votre espace membre.</p>';
+			wp_mail( $recipient->user_email, $subject, $body, array( 'Content-Type: text/html; charset=UTF-8' ) );
+		}
 
 	public static function on_new_reply( int $reply_id, int $topic_id = 0 ): void {
 		if ( ! $reply_id || ! function_exists( 'bbp_get_reply_topic_id' ) ) {

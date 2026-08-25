@@ -90,14 +90,23 @@ final class PFC_Registration {
 		if ( ! empty( $errors ) ) self::render_register( array( 'error' => implode( ' ', $errors ), 'first' => $first, 'last' => $last, 'email' => $email, 'login' => $login ) );
 		$user_id = wp_insert_user( array( 'user_login' => $login, 'user_pass' => $pass, 'user_email' => $email, 'first_name' => $first, 'last_name' => $last, 'display_name' => trim( $first . ' ' . $last ), 'role' => 'subscriber' ) );
 		if ( is_wp_error( $user_id ) ) self::render_register( array( 'error' => $user_id->get_error_message(), 'first' => $first, 'last' => $last, 'email' => $email, 'login' => $login ) );
-		$code = (string) random_int( 100000, 999999 );
-		update_user_meta( $user_id, self::META_PENDING, 1 );
-		update_user_meta( $user_id, self::META_HASH, wp_hash_password( $code ) );
-		update_user_meta( $user_id, self::META_EXPIRES, time() + 15 * MINUTE_IN_SECONDS );
-		update_user_meta( $user_id, self::META_ATTEMPTS, 0 );
-		$sent = wp_mail( $email, __( 'Votre code de confirmation Atelier', 'premium-forum-core' ), sprintf( __( "Bonjour %1$s,\n\nVotre code de confirmation Atelier est : %2$s\n\nIl est valable 15 minutes. Si vous n’êtes pas à l’origine de cette demande, ignorez ce message.", 'premium-forum-core' ), $first, $code ) );
+		$sent = false;
+		try {
+			$code = function_exists( 'random_int' ) ? (string) random_int( 100000, 999999 ) : (string) wp_rand( 100000, 999999 );
+			update_user_meta( $user_id, self::META_PENDING, 1 );
+			update_user_meta( $user_id, self::META_HASH, wp_hash_password( $code ) );
+			update_user_meta( $user_id, self::META_EXPIRES, time() + 15 * MINUTE_IN_SECONDS );
+			update_user_meta( $user_id, self::META_ATTEMPTS, 0 );
+			$sent = wp_mail( $email, __( 'Votre code de confirmation Atelier', 'premium-forum-core' ), sprintf( __( "Bonjour %1$s,\n\nVotre code de confirmation Atelier est : %2$s\n\nIl est valable 15 minutes. Si vous n’êtes pas à l’origine de cette demande, ignorez ce message.", 'premium-forum-core' ), $first, $code ) );
+		} catch ( \Throwable $exception ) {
+			error_log( 'PFC registration mail failure: ' . $exception->getMessage() );
+		}
 		if ( ! $sent ) {
-			wp_delete_user( $user_id );
+			try {
+				wp_delete_user( $user_id );
+			} catch ( \Throwable $exception ) {
+				error_log( 'PFC registration cleanup failure: ' . $exception->getMessage() );
+			}
 			self::render_register( array( 'error' => __( 'L’e-mail n’a pas pu être envoyé. Aucun compte n’a été conservé ; réessayez plus tard.', 'premium-forum-core' ), 'first' => $first, 'last' => $last, 'email' => $email, 'login' => $login ) );
 		}
 		self::render_verify( array( 'success' => __( 'Votre code a été envoyé. Consultez votre boîte de réception pour confirmer votre adresse.', 'premium-forum-core' ), 'email' => $email ) );
