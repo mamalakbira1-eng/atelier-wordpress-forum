@@ -2,7 +2,7 @@
 /**
  * Plugin Name: Premium Forum Core
  * Description: SEO LLM-first, profils, compteurs historiques et migration CSV sécurisée pour bbPress.
- * Version: 0.3.0
+ * Version: 0.4.0
  * Requires at least: 6.4
  * Requires PHP: 8.1
  * Requires Plugins: bbpress
@@ -11,7 +11,7 @@
 
 defined( 'ABSPATH' ) || exit;
 
-define( 'PFC_VERSION', '0.3.0' );
+define( 'PFC_VERSION', '0.4.0' );
 define( 'PFC_FILE', __FILE__ );
 define( 'PFC_DIR', plugin_dir_path( __FILE__ ) );
 define( 'PFC_URL', plugin_dir_url( __FILE__ ) );
@@ -20,6 +20,7 @@ require_once PFC_DIR . 'includes/class-pfc-importer.php';
 require_once PFC_DIR . 'includes/class-pfc-admin.php';
 require_once PFC_DIR . 'includes/class-pfc-seo.php';
 require_once PFC_DIR . 'includes/class-pfc-community.php';
+require_once PFC_DIR . 'includes/class-pfc-registration.php';
 
 register_activation_hook( __FILE__, array( 'PFC_Importer', 'activate' ) );
 
@@ -34,5 +35,7 @@ add_action( 'plugins_loaded', static function() {
 	PFC_Importer::ensure_schema();
 	PFC_Importer::init();
 	PFC_Admin::init();
-	PFC_SEO::init();
+			PFC_SEO::init();
+		PFC_Registration::init();
+
 } );
