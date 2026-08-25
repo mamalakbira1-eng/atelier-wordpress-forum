@@ -60,7 +60,7 @@
     document.querySelectorAll('[data-pfc-follow]').forEach((button) => button.addEventListener('click', async () => {
       if (!community.loggedIn) { window.location.href = button.dataset.login || '/wp-login.php'; return; }
       button.disabled = true;
-      try { await refreshNonce(); const payload = await communityRequest({ action: 'pfc_toggle_follow', topic_id: button.dataset.topicId }); if (!payload.success) throw new Error('follow'); button.textContent = payload.data.label; button.setAttribute('aria-pressed', String(payload.data.following)); } catch (_) { button.textContent = 'Réessayer'; } finally { button.disabled = false; }
+      try { await refreshNonce(); const payload = await communityRequest({ action: 'pfc_toggle_follow', topic_id: button.dataset.topicId }); if (!payload.success) throw new Error('follow'); button.textContent = 'Suivre'; button.classList.toggle('is-active', Boolean(payload.data.following)); button.setAttribute('aria-pressed', String(payload.data.following)); } catch (_) { button.textContent = 'Réessayer'; } finally { button.disabled = false; }
     }));
     document.querySelectorAll('[data-pfc-mark-read]').forEach((button) => button.addEventListener('click', async () => {
       button.disabled = true;
@@ -77,12 +77,40 @@
         button.setAttribute('aria-pressed', String(Boolean(payload.data.voted)));
         const label = button.querySelector('[data-pfc-vote-label]');
         const count = button.querySelector('[data-pfc-vote-count]');
-        if (label) label.textContent = payload.data.voted ? 'Vote ajouté' : 'Voter utile';
+        if (label) label.textContent = button.closest('.atelier-reply') ? 'utile' : 'Voter utile';
         if (count) count.textContent = String(payload.data.count);
       } catch (error) {
         const label = button.querySelector('[data-pfc-vote-label]');
-        if (label && error?.message) label.textContent = error.message;
+        if (label && error?.message) { label.textContent = button.closest('.atelier-reply') ? 'utile' : 'Voter utile'; button.setAttribute('aria-label', error.message); }
       } finally { button.disabled = false; }
     }));
   }
+
+  // Navigation de discussion : les ancres déplacent la lecture, les filtres changent réellement la collection.
+  const repliesSection = document.querySelector('[data-replies-section]');
+  if (repliesSection) {
+    const replyList = [...repliesSection.querySelectorAll('.atelier-reply')];
+    const filterLinks = [...document.querySelectorAll('[data-atelier-filter]')];
+    const sortSelect = repliesSection.querySelector('[data-atelier-sort]');
+    const originalOrder = [...replyList];
+    const applyFilter = (filter) => {
+      const visible = filter === 'featured' ? replyList.filter((reply) => Number(reply.dataset.replyVotes || 0) > 0) : replyList;
+      const ordered = filter === 'latest' ? [...visible].sort((a, b) => Number(b.dataset.replyDate || 0) - Number(a.dataset.replyDate || 0)) : filter === 'all' ? originalOrder : visible;
+      ordered.forEach((reply) => repliesSection.appendChild(reply));
+      replyList.forEach((reply) => { reply.hidden = !visible.includes(reply); });
+      filterLinks.forEach((link) => { const active = link.dataset.atelierFilter === filter; link.classList.toggle('is-active', active); if (active) link.setAttribute('aria-current', 'true'); else link.removeAttribute('aria-current'); });
+    };
+    filterLinks.forEach((link) => link.addEventListener('click', (event) => { event.preventDefault(); applyFilter(link.dataset.atelierFilter || 'all'); document.querySelector('#reponses')?.scrollIntoView({ behavior: 'smooth', block: 'start' }); }));
+    sortSelect?.addEventListener('change', () => {
+      const mode = sortSelect.value;
+      const sorted = [...replyList].sort((a, b) => mode === 'votes' ? Number(b.dataset.replyVotes || 0) - Number(a.dataset.replyVotes || 0) : mode === 'date' ? Number(b.dataset.replyDate || 0) - Number(a.dataset.replyDate || 0) : replyList.indexOf(a) - replyList.indexOf(b));
+      sorted.forEach((reply) => repliesSection.appendChild(reply));
+    });
+    applyFilter('all');
+  }
+
+  document.querySelectorAll('a[href^="#"]').forEach((link) => link.addEventListener('click', () => {
+    const target = document.querySelector(link.getAttribute('href'));
+    if (target) window.setTimeout(() => target.setAttribute('tabindex', '-1'), 0);
+  }));
 })();
