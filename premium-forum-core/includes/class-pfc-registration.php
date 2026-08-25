@@ -15,6 +15,8 @@ final class PFC_Registration {
 		add_action( 'login_init', array( __CLASS__, 'route_login' ) );
 		add_filter( 'authenticate', array( __CLASS__, 'block_unverified_user' ), 30, 3 );
 		add_filter( 'login_body_class', array( __CLASS__, 'login_body_class' ) );
+		add_action( 'wp_ajax_nopriv_pfc_check_username', array( __CLASS__, 'ajax_check_username' ) );
+		add_action( 'wp_ajax_pfc_check_username', array( __CLASS__, 'ajax_check_username' ) );
 	}
 
 	public static function route_login(): void {
@@ -37,6 +39,28 @@ final class PFC_Registration {
 		$action = sanitize_key( $_REQUEST['action'] ?? '' );
 		if ( in_array( $action, array( 'register', 'verify', 'resend' ), true ) ) $classes[] = 'atelier-registration-route';
 		return $classes;
+	}
+
+	public static function ajax_check_username(): void {
+		$nonce = sanitize_text_field( wp_unslash( $_REQUEST['nonce'] ?? '' ) );
+		if ( ! wp_verify_nonce( $nonce, 'pfc_username_check' ) ) {
+			wp_send_json_error( array( 'message' => 'Vérification expirée.' ), 403 );
+		}
+		$login = sanitize_user( wp_unslash( $_REQUEST['username'] ?? '' ), true );
+		if ( '' === $login || ! validate_username( $login ) ) {
+			wp_send_json_success( array( 'available' => false, 'message' => 'Ce pseudo n’est pas utilisable.' ) );
+		}
+		$available = ! username_exists( $login );
+		$suggestions = array();
+		if ( ! $available ) {
+			for ( $i = 2; $i <= 4; $i++ ) {
+				$candidate = $login . $i;
+				if ( ! username_exists( $candidate ) ) {
+					$suggestions[] = $candidate;
+				}
+			}
+		}
+		wp_send_json_success( array( 'available' => $available, 'message' => $available ? 'Pseudo disponible.' : 'Ce pseudo est déjà utilisé.', 'suggestions' => $suggestions ) );
 	}
 
 	public static function block_unverified_user( $user, string $username, string $password ) {
@@ -117,7 +141,7 @@ final class PFC_Registration {
 	private static function render_register( array $state = array() ): void {
 		login_header( __( 'Créer un compte Atelier', 'premium-forum-core' ), '', new WP_Error( 'pfc_register', $state['error'] ?? '' ) );
 		$first = esc_attr( $state['first'] ?? '' ); $last = esc_attr( $state['last'] ?? ''); $email = esc_attr( $state['email'] ?? '' ); $login = esc_attr( $state['login'] ?? '' );
-		echo '<main class="atelier-auth-card atelier-register-card"><p class="atelier-kicker">Nouvelle archive membre</p><h2>Créer votre accès Atelier.</h2><p class="atelier-auth-lead">Une identité claire pour contribuer, suivre les discussions et retrouver vos sources.</p><form name="registerform" id="registerform" action="' . esc_url( self::login_url( 'register' ) ) . '" method="post" novalidate><input type="hidden" name="pfc_register_nonce" value="' . esc_attr( wp_create_nonce( 'pfc_register' ) ) . '"><div class="atelier-form-grid"><p><label for="first_name">Prénom</label><input id="first_name" name="first_name" type="text" value="' . $first . '" autocomplete="given-name" required></p><p><label for="last_name">Nom</label><input id="last_name" name="last_name" type="text" value="' . $last . '" autocomplete="family-name" required></p></div><p><label for="user_email">Adresse e-mail</label><input id="user_email" name="user_email" type="email" value="' . $email . '" autocomplete="email" required></p><p><label for="user_login">Votre pseudo <span>(modifiable)</span></label><input id="user_login" name="user_login" type="text" value="' . $login . '" autocomplete="username" required><small id="atelier-username-hint">Nous vous proposerons un pseudo à partir de votre nom.</small></p><div class="atelier-form-grid"><p><label for="user_pass">Mot de passe</label><input id="user_pass" name="user_pass" type="password" autocomplete="new-password" minlength="10" required></p><p><label for="user_pass_confirm">Confirmation</label><input id="user_pass_confirm" name="user_pass_confirm" type="password" autocomplete="new-password" minlength="10" required></p></div><p class="atelier-password-note">10 caractères minimum. Votre compte restera inactif jusqu’à la confirmation de l’adresse.</p><p class="submit"><button type="submit" class="button button-primary">Recevoir mon code <span>↗</span></button></p></form><p class="atelier-auth-switch">Vous avez déjà un accès ? <a href="' . esc_url( wp_login_url() ) . '">Se connecter</a></p></main><script>(function(){const f=document.getElementById("first_name"),l=document.getElementById("last_name"),u=document.getElementById("user_login");function suggest(){if(!u.dataset.edited){const a=(f.value+"."+l.value).toLowerCase().normalize("NFD").replace(/[\\u0300-\\u036f]/g,"").replace(/[^a-z0-9.]/g,"").replace(/^\\.|\\.$/g,"");u.value=a||"";}}[f,l].forEach(e=>e.addEventListener("input",suggest));u.addEventListener("input",()=>u.dataset.edited="1");suggest();})();</script>';
+		echo '<main class="atelier-auth-card atelier-register-card"><p class="atelier-kicker">Nouvelle archive membre</p><h2>Créer votre accès Atelier.</h2><p class="atelier-auth-lead">Une identité claire pour contribuer, suivre les discussions et retrouver vos sources.</p><form name="registerform" id="registerform" action="' . esc_url( self::login_url( 'register' ) ) . '" method="post" novalidate><input type="hidden" name="pfc_register_nonce" value="' . esc_attr( wp_create_nonce( 'pfc_register' ) ) . '"><div class="atelier-form-grid"><p><label for="first_name">Prénom</label><input id="first_name" name="first_name" type="text" value="' . $first . '" autocomplete="given-name" required></p><p><label for="last_name">Nom</label><input id="last_name" name="last_name" type="text" value="' . $last . '" autocomplete="family-name" required></p></div><p><label for="user_email">Adresse e-mail</label><input id="user_email" name="user_email" type="email" value="' . $email . '" autocomplete="email" required></p><p><label for="user_login">Votre pseudo <span>(modifiable)</span></label><input id="user_login" name="user_login" type="text" value="' . $login . '" autocomplete="username" required><small id="atelier-username-hint">Nous vous proposerons un pseudo à partir de votre nom.</small><span id="atelier-username-status" class="atelier-username-status" role="status" aria-live="polite"></span><div id="atelier-username-alternatives" class="atelier-username-alternatives" hidden></div></p><div class="atelier-form-grid"><p><label for="user_pass">Mot de passe</label><input id="user_pass" name="user_pass" type="password" autocomplete="new-password" minlength="10" required></p><p><label for="user_pass_confirm">Confirmation</label><input id="user_pass_confirm" name="user_pass_confirm" type="password" autocomplete="new-password" minlength="10" required></p></div><p class="atelier-password-note">10 caractères minimum. Votre compte restera inactif jusqu’à la confirmation de l’adresse.</p><p class="submit"><button type="submit" class="button button-primary">Recevoir mon code <span>↗</span></button></p></form><p class="atelier-auth-switch">Vous avez déjà un accès ? <a href="' . esc_url( wp_login_url() ) . '">Se connecter</a></p></main><script>(function(){const f=document.getElementById("first_name"),l=document.getElementById("last_name"),u=document.getElementById("user_login"),s=document.getElementById("atelier-username-status"),a=document.getElementById("atelier-username-alternatives");let timer;function suggest(){if(!u.dataset.edited){u.value=(f.value+"."+l.value).toLowerCase().normalize("NFD").replace(/[\\u0300-\\u036f]/g,"").replace(/[^a-z0-9.]/g,"").replace(/^\\.|\\.$/g,"");}check();}function check(){clearTimeout(timer);const value=u.value.trim();a.hidden=true;a.innerHTML="";if(!value){s.textContent="";return;}s.textContent="Vérification…";timer=setTimeout(()=>{fetch("' . esc_url( admin_url( 'admin-ajax.php' ) ) . '?action=pfc_check_username&username="+encodeURIComponent(value)+"&nonce=' . esc_attr( wp_create_nonce( 'pfc_username_check' ) ) . '",{credentials:"same-origin"}).then(r=>r.json()).then(d=>{const x=d.data||{};s.textContent=x.message||"";s.className="atelier-username-status "+(x.available?"is-available":"is-taken");if(!x.available&&(x.suggestions||[]).length){a.hidden=false;a.innerHTML="Suggestions : "+x.suggestions.map(v=>"<button type=\\"button\\" data-username=\\""+v+"\\">"+v+"</button>").join("");a.querySelectorAll("button").forEach(b=>b.onclick=()=>{u.value=b.dataset.username;u.dataset.edited="1";check();});}}).catch(()=>{s.textContent="";});},280);} [f,l].forEach(e=>e.addEventListener("input",suggest));u.addEventListener("input",()=>{u.dataset.edited="1";check();});suggest();})();</script>';
 		login_footer();
 		exit;
 	}

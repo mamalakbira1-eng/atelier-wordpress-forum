@@ -31,3 +31,12 @@ body.login.atelier-registration-route #login .atelier-auth-card{width:auto;margi
 .atelier-resend-form{margin-top:4px!important;text-align:center}
 @media(max-width:700px){body.login.atelier-registration-route #login{width:auto;margin:56px auto 0;padding:32px 24px 26px}.atelier-auth-card{width:auto;margin:56px 16px 0;padding:32px 24px 26px}.atelier-auth-card h2{font-size:31px}.atelier-form-grid{grid-template-columns:1fr;gap:0}.atelier-login-register{align-items:flex-start;flex-direction:column;gap:5px}.atelier-verify-card #verification_code{font-size:21px;letter-spacing:.2em}}
 @media(prefers-reduced-motion:reduce){.atelier-auth-card .button-primary{transition:none}}
+
+/* Atelier registration availability: feedback direct, discret et actionnable, sans transformer le formulaire en interface technique. */
+.atelier-username-status{display:block;margin-top:7px;color:var(--atelier-muted);font-size:10px;font-weight:800;line-height:1.4}
+.atelier-username-status.is-available{color:#2f6b4f}
+.atelier-username-status.is-taken{color:var(--atelier-vermilion)}
+.atelier-username-alternatives{display:flex;align-items:center;flex-wrap:wrap;gap:6px;margin-top:8px;color:var(--atelier-muted);font-size:10px}
+.atelier-username-alternatives[hidden]{display:none}
+.atelier-username-alternatives button{padding:4px 7px;border:1px solid var(--atelier-line);border-radius:0;background:#fffdfa;color:var(--atelier-ink);font:700 10px/1.2 Manrope,system-ui,sans-serif;cursor:pointer}
+.atelier-username-alternatives button:hover,.atelier-username-alternatives button:focus{border-color:var(--atelier-vermilion);color:var(--atelier-vermilion);outline:0}

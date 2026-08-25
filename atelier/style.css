@@ -244,3 +244,11 @@ body .atelier-header__search-wrap{position:relative;flex:none}body .atelier-head
 .atelier-thread__actions .atelier-button--save svg{stroke-width:1.6}
 .atelier-thread__figure img{height:auto!important;aspect-ratio:1.15/1!important;object-fit:cover!important}
 .atelier-collection-card::before{background:url('assets/images/atelier-knowledge-map.webp') center/cover no-repeat!important}
+
+/* Atelier — Message initial : le rail porte le rôle, le corps porte l’identité au-dessus du texte comme la preview React. */
+.atelier-initial-post__identity{display:flex;align-items:flex-start;justify-content:space-between;gap:24px;margin:0 0 24px}
+.atelier-initial-post__identity .atelier-post-meta{justify-content:flex-start!important;gap:8px;margin:0!important;min-width:0}
+.atelier-initial-post__identity>time{flex:0 0 auto;color:var(--atelier-soft);font-size:11px;line-height:1.4;white-space:nowrap}
+.atelier-initial-post__identity .atelier-author a{font-weight:900}
+.atelier-initial-post__content{margin-top:0}
+@media(max-width:700px){.atelier-initial-post__identity{flex-direction:column;gap:7px;margin-bottom:19px}.atelier-initial-post__identity>time{white-space:normal}.atelier-initial-post__identity .atelier-post-meta{align-items:flex-start}}
