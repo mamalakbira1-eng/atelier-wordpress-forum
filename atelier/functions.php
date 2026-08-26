@@ -3,8 +3,15 @@ defined( 'ABSPATH' ) || exit;
 /** Atelier: modernisme éditorial tactile, HTML explicite et lecture LLM-first. */
 add_action( 'after_setup_theme', static function() { add_theme_support( 'title-tag' ); add_theme_support( 'post-thumbnails' ); add_theme_support( 'bbpress' ); add_theme_support( 'html5', array( 'search-form', 'comment-form', 'comment-list', 'gallery', 'caption', 'style', 'script' ) ); register_nav_menus( array( 'primary' => __( 'Navigation principale', 'atelier' ) ) ); } );
 add_action( 'wp_enqueue_scripts', static function() { $theme_version = wp_get_theme()->get( 'Version' ); $style_file = get_stylesheet_directory() . '/style.css'; $script_file = get_template_directory() . '/assets/js/atelier-interactions.js'; $style_version = file_exists( $style_file ) ? (string) filemtime( $style_file ) : $theme_version; $script_version = file_exists( $script_file ) ? (string) filemtime( $script_file ) : $theme_version; wp_enqueue_style( 'atelier', get_stylesheet_uri(), array(), $style_version ); wp_enqueue_script( 'atelier-interactions', get_template_directory_uri() . '/assets/js/atelier-interactions.js', array(), $script_version, true ); wp_localize_script( 'atelier-interactions', 'atelierSearch', array( 'ajaxUrl' => admin_url( 'admin-ajax.php' ), 'minChars' => 2 ) ); wp_localize_script( 'atelier-interactions', 'atelierCommunity', array( 'ajaxUrl' => admin_url( 'admin-ajax.php' ), 'nonceUrl' => add_query_arg( 'action', 'pfc_community_nonce', admin_url( 'admin-ajax.php' ) ), 'nonce' => wp_create_nonce( 'pfc_community' ), 'loggedIn' => is_user_logged_in() ) ); } );
-/** Atelier — l’accueil reste rapidement renouvelable pendant la recette et après un changement de thème. */
-add_action( 'send_headers', static function(): void { if ( is_front_page() || is_home() ) { header( 'Cache-Control: public, max-age=300, s-maxage=300, must-revalidate' ); header( 'Vary: Accept-Encoding' ); } } );
+/** Atelier — les lectures publiques sont cacheables ; les espaces connectés ne le sont jamais. */
+add_action( 'send_headers', static function(): void {
+	if ( is_user_logged_in() || is_admin() || is_feed() || is_search() || is_404() || is_preview() ) return;
+	$is_public_read = is_front_page() || is_home() || is_page() || is_singular( 'topic' ) || is_post_type_archive();
+	if ( $is_public_read ) {
+		header( 'Cache-Control: public, max-age=300, s-maxage=300, must-revalidate' );
+		header( 'Vary: Accept-Encoding' );
+	}
+} );
 add_filter( 'bbp_get_template_stack', static function( array $stack ): array { array_unshift( $stack, trailingslashit( get_stylesheet_directory() ) . 'bbpress/' ); return $stack; } );
 function atelier_rank( int $user_id ): string { return (string) get_user_meta( $user_id, 'pfc_rank', true ); }
 function atelier_initials( int $user_id ): string { $user = get_userdata( $user_id ); if ( ! $user ) return '–'; $source = trim( $user->first_name . ' ' . $user->last_name ); if ( '' === $source ) $source = $user->display_name; $words = preg_split( '/\s+/', $source ); $letters = ''; foreach ( array_slice( array_filter( $words ), 0, 2 ) as $word ) $letters .= mb_strtoupper( mb_substr( $word, 0, 1 ) ); return $letters ?: mb_strtoupper( mb_substr( $source, 0, 1 ) ); }

@@ -137,8 +137,19 @@ final class PFC_Importer {
 		wp_mkdir_p( $dir );
 
 		$files = $_FILES['pfc_files'];
-		for ( $i = 0; $i < count( $files['name'] ); $i++ ) {
+		$file_count = count( $files['name'] );
+		if ( $file_count < 1 || $file_count > 4 ) {
+			self::redirect( 0, 'error', 'Le pack doit contenir entre un et quatre fichiers.' );
+		}
+		$total_bytes = 0;
+		for ( $i = 0; $i < $file_count; $i++ ) {
 			$name = sanitize_file_name( $files['name'][ $i ] );
+			$size = absint( $files['size'][ $i ] ?? 0 );
+			$total_bytes += $size;
+			if ( $size > 5 * MB_IN_BYTES || $total_bytes > 20 * MB_IN_BYTES ) {
+				self::add_item( $job_id, 'file', $name, 0, 'error', 0, array( 'message' => 'Taille du pack excessive : maximum 5 Mo par fichier et 20 Mo au total.' ) );
+				continue;
+			}
 			$extension = strtolower( pathinfo( $name, PATHINFO_EXTENSION ) );
 			if ( $files['error'][ $i ] !== UPLOAD_ERR_OK || ! in_array( $extension, array( 'csv', 'zip' ), true ) ) {
 				self::add_item( $job_id, 'file', $name, 0, 'error', 0, array( 'message' => 'Fichier CSV ou ZIP invalide.' ) );

@@ -5,15 +5,27 @@ final class PFC_SEO {
 	public static function init(): void {
 		add_filter( 'the_content', array( __CLASS__, 'ugc_links' ), 30 );
 		/* bbPress initialise sa boucle de réponses pendant le rendu du template :
-		 * le JSON-LD est donc émis avant </body>, une position valide pour schema.org. */
+		 * le JSON-LD est émis avant </body>, une position valide pour schema.org. */
 			add_action( 'wp_head', array( __CLASS__, 'meta_description' ), 1 );
+			add_action( 'wp_head', array( __CLASS__, 'front_page_canonical' ), 2 );
 			add_action( 'wp_footer', array( __CLASS__, 'topic_schema' ), 20 );
 			add_action( 'wp_footer', array( __CLASS__, 'breadcrumb_schema' ), 21 );
 			add_filter( 'document_title_parts', array( __CLASS__, 'title' ) );
 	}
 	public static function ugc_links( string $content ): string { return function_exists( 'wp_rel_ugc' ) ? wp_rel_ugc( $content ) : $content; }
-			public static function title( array $parts ): array { if ( function_exists( 'bbp_is_single_topic' ) && bbp_is_single_topic() ) { $parts['title'] = get_the_title() . ' — ' . bbp_get_forum_title( bbp_get_topic_forum_id() ); } return $parts; }
-		public static function meta_description(): void {
+			public static function title( array $parts ): array {
+			if ( function_exists( 'bbp_is_single_topic' ) && bbp_is_single_topic() ) {
+				$parts['title'] = get_the_title() . ' — ' . bbp_get_forum_title( bbp_get_topic_forum_id() );
+				$parts['site']  = 'Atelier';
+				unset( $parts['tagline'] );
+			} elseif ( is_front_page() || is_home() ) {
+				$parts['title'] = 'Atelier — Forum de connaissances';
+				$parts['site']  = 'Atelier';
+				unset( $parts['tagline'] );
+			}
+			return $parts;
+		}
+	public static function meta_description(): void {
 			$description = '';
 			if ( function_exists( 'bbp_is_single_topic' ) && bbp_is_single_topic() ) {
 				$topic = get_queried_object();
@@ -29,7 +41,14 @@ final class PFC_SEO {
 			if ( $description ) {
 				echo '<meta name="description" content="' . esc_attr( $description ) . '">' . "\n";
 			}
+	}
+
+	/** Rend un canonique explicite pour l’URL racine sans dupliquer les canoniques WordPress des contenus singuliers. */
+	public static function front_page_canonical(): void {
+		if ( ( is_front_page() || is_home() ) && ! is_paged() ) {
+			echo '<link rel="canonical" href="' . esc_url( home_url( '/' ) ) . '">' . "\n";
 		}
+	}
 
 	public static function topic_schema(): void {
 		if ( ! function_exists( 'bbp_is_single_topic' ) || ! bbp_is_single_topic() ) return;
@@ -55,7 +74,7 @@ final class PFC_SEO {
 	}
 		public static function breadcrumb_schema(): void {
 			if ( ! function_exists( 'bbp_is_single_topic' ) || ! function_exists( 'bbp_is_single_forum' ) || ( ! bbp_is_single_topic() && ! bbp_is_single_forum() ) ) return;
-			$items = array( array( '@type' => 'ListItem', 'position' => 1, 'name' => get_bloginfo( 'name' ), 'item' => home_url( '/' ) ) );
+			$items = array( array( '@type' => 'ListItem', 'position' => 1, 'name' => 'Atelier', 'item' => home_url( '/' ) ) );
 			if ( bbp_is_single_topic() ) {
 				$forum_id = bbp_get_topic_forum_id();
 				$items[] = array( '@type' => 'ListItem', 'position' => 2, 'name' => bbp_get_forum_title( $forum_id ), 'item' => bbp_get_forum_permalink( $forum_id ) );

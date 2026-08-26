@@ -40,3 +40,6 @@ body.login.atelier-registration-route #login .atelier-auth-card{width:auto;margi
 .atelier-username-alternatives[hidden]{display:none}
 .atelier-username-alternatives button{padding:4px 7px;border:1px solid var(--atelier-line);border-radius:0;background:#fffdfa;color:var(--atelier-ink);font:700 10px/1.2 Manrope,system-ui,sans-serif;cursor:pointer}
 .atelier-username-alternatives button:hover,.atelier-username-alternatives button:focus{border-color:var(--atelier-vermilion);color:var(--atelier-vermilion);outline:0}
+
+/* PFC anti-spam : champ leurre invisible pour les humains et lecteurs d’écran. */
+.pfc-honeypot{position:absolute!important;left:-10000px!important;width:1px!important;height:1px!important;overflow:hidden!important}

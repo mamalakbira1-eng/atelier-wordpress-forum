@@ -1,61 +1,40 @@
-# Atelier — forum WordPress premium, SEO/LLM-first
+# Atelier — forum WordPress / bbPress
 
-Ce dépôt contient la base de code transmissible du forum WordPress **Atelier** : thème custom compatible bbPress, extension Premium Forum Core, fixtures CSV de recette, archives installables, scripts de validation et documentation de reprise développeur.
+Atelier est un forum WordPress lisible par les humains et les systèmes, construit avec **bbPress**, le thème **Atelier 0.4.28** et le plugin **Premium Forum Core 0.4.4**. Le thème porte l’interface éditoriale, le responsive et le RTL; PFC concentre les règles communautaires, d’inscription, d’import, de modération et de SEO.
 
-## Sécurité
+## Artefacts de référence
 
-Le dépôt est public. Les mots de passe, cookies, tokens, clés API, fichiers de configuration et données personnelles ont été exclus. Les adresses des fixtures publiques utilisent le domaine réservé `example.test`. Les comptes réellement présents sur le staging ne doivent jamais être recréés avec un mot de passe communiqué dans GitHub.
+| Composant | Archive installable | Répertoire attendu | Rôle |
+|---|---|---|---|
+| Thème | `release/atelier-0.4.28-active-theme-senior-audit.zip` | `atelier-0428/` | Interface publique, login Atelier, templates bbPress, RTL et cache public. |
+| Plugin | `release/premium-forum-core-0.4.4-senior-audit.zip` | `premium-forum-core/` | Inscription, modération, import CSV, votes, suivis, notifications et SEO. |
 
-## Versions transmises
+> **Point de déploiement critique.** Le thème réellement actif porte le nom de dossier `atelier-0428`. Une archive dont la racine est `atelier/` installe un autre thème et ne modifie pas le thème actif.
 
-| Élément | Version | Contenu |
-|---|---:|---|
-| Thème Atelier | 0.4.28 | UI premium, bbPress, RTL arabe, connexion et inscription |
-| Premium Forum Core | 0.4.2 | Import CSV, SEO/JSON-LD, communauté, notifications, pseudo et modération |
-| WordPress cible | 7.1 | Environnement de staging utilisé pour la recette |
-| bbPress cible | 2.6 | Forums, sujets, réponses et profils |
-| PHP cible | 8.3 | Syntaxe validée localement |
+## Installation et mise à jour
 
-## Structure
+Installez bbPress, puis importez les archives via **Apparence → Thèmes** et **Extensions → Ajouter → Téléverser une extension**. Si WordPress annonce qu’un répertoire existe, choisissez le remplacement uniquement après sauvegarde des fichiers et de la base. Vérifiez que les versions visibles sont Atelier 0.4.28 et PFC 0.4.4, purgez LiteSpeed/CDN, puis contrôlez l’accueil et un sujet dans une fenêtre non connectée.
 
-| Dossier | Contenu |
-|---|---|
-| `atelier/` | Thème WordPress Atelier et templates bbPress. |
-| `premium-forum-core/` | Plugin PFC : import CSV, SEO, inscription, notifications et modération. |
-| `fixtures/` | Forums, sujets, réponses et membres de test sans mots de passe. |
-| `release/` | Archives finales prêtes à installer sur un staging. |
-| `docs/` | Validation, architecture, sécurité et relais développeur. |
-| `tools/` | Scripts de génération et de validation. |
-| `validation-screenshots/` | Captures de validation visuelle non sensibles. |
+L’import d’historique se fait dans **Premium Forum → Importer**. Téléchargez les modèles fournis, exécutez d’abord un dry run, examinez les erreurs et le mapping, puis lancez l’import. Le rollback ne retire que les objets journalisés par un job sélectionné : il ne remplace jamais une sauvegarde complète de la base.
 
-## Installation
+## Contrat CSV
 
-Installer bbPress, puis téléverser `release/premium-forum-core-0.4.2-registration-mail-guard.zip` dans **Extensions → Ajouter une extension**. Téléverser ensuite `release/atelier-0.4.28-registration-moderation-smtp-guard.zip` dans **Apparence → Thèmes → Ajouter un thème**, puis activer Atelier. Vérifier les permaliens et purger LiteSpeed après activation.
+Les en-têtes des modèles sont la référence. Les alias courants comprennent `pseudo → username`, `mail → email`, `topic_id → legacy_topic_id`, `author_id → legacy_author_id`, `body → content`, `date → created_at` et `votes → upvotes_count`. Le filtre `pfc_csv_header_mapping` permet d’étendre ce mapping. Les mots de passe en clair sont refusés; les comptes historiques doivent être migrés avec un mécanisme de réinitialisation de mot de passe adapté, jamais avec une valeur réutilisable.
 
-L’import de recette se fait depuis **Premium Forum → Import CSV**. Commencer par un dry run, vérifier le mapping et le journal, puis lancer l’import uniquement après sauvegarde. Les fixtures sont un jeu de démonstration et ne doivent pas être importées sur un site de production sans validation éditoriale.
+Les limites appliquées sont de quatre fichiers, 5 Mo par fichier et 20 Mo pour le pack. L’import conserve les dates et compteurs historiques validés par les données source; il n’invente pas de votes individuels.
 
-## Fonctionnalités principales
+## Vérifications locales minimales
 
-Le forum fournit une page d’accueil éditoriale, des espaces, une recherche progressive, des pages de sujets, un rail d’index, des cartes de réponses, les votes utiles, le suivi, le partage, les profils membres, l’espace personnel et une structure HTML explicite. Les contributions arabes détectées reçoivent une mise en page RTL et la typographie Noto Naskh Arabic.
+```bash
+cd /chemin/vers/atelier-wordpress
+find atelier premium-forum-core -name '*.php' -print0 | xargs -0 -n1 php -l
+php tools/test-pfc-validation.php .test-sandbox/packs/valid .test-sandbox/packs/invalid
+```
 
-L’inscription comprend le prénom, le nom, le pseudo suggéré, la disponibilité AJAX avec alternatives, la revalidation serveur, un mot de passe de dix caractères minimum et un code e-mail à six chiffres valable quinze minutes avec cinq tentatives maximum. Les nouveaux sujets et réponses des membres ordinaires peuvent être retenus dans la file centrale **À valider**.
+Le harnais CSV doit indiquer `"pass": true`. Pour le staging, reprendre ensuite les scénarios de `docs/prompts-audit-simulation-claude.md` et le rapport `docs/senior-audit-findings-20260826.md`.
 
-## Correctif inscription et SMTP
+## Sécurité et mise en production
 
-L’erreur critique reproduite sur le staging se produisait après la création du compte, dans l’étape de génération ou d’envoi du code. Le handler intercepte maintenant les exceptions `Throwable`, protège le nettoyage et retourne un message contrôlé si `wp_mail()` échoue. Le retest a confirmé l’absence d’erreur critique et la suppression du compte incomplet.
+Le staging reste volontairement en `noindex, nofollow`. Avant production, configurez un SMTP transactionnel ou un mail catcher, testez réception et délivrabilité, puis vérifiez SPF, DKIM, DMARC et le domaine expéditeur. Les secrets SMTP, cookies, mots de passe, exports SQL, journaux de membres et URLs privées ne doivent jamais rejoindre ce dépôt.
 
-Le staging retourne actuellement un échec d’envoi e-mail contrôlé : le SMTP transactionnel n’est pas encore configuré. Il faut configurer et tester SMTP avant l’ouverture publique. Voir `docs/DEVELOPER-HANDOFF-20260825.md` pour le détail et l’ordre de reprise.
-
-## Rôles
-
-`Membre SVIP` est un rôle communautaire de reconnaissance et ne donne pas automatiquement les droits de modération. `Modérateur Atelier` est séparé de l’administration WordPress et dispose des capacités de gouvernance configurées par PFC. Les comptes de recette et leurs mots de passe ne sont volontairement pas documentés dans ce dépôt public.
-
-## Reprise développeur
-
-Lire en premier `docs/DEVELOPER-HANDOFF-20260825.md`, puis `docs/registration-0428.md`, `docs/moderation-and-username-0428.md`, `docs/visual-parity-20260825.md` et les classes PFC correspondantes. Les données du staging — utilisateurs, notifications, suivis et contenus réellement publiés — ne sont pas versionnées ici.
-
-Avant toute mise en production, configurer SMTP, ajouter un anti-spam, finaliser RGPD/CGU/confidentialité, vérifier l’accessibilité clavier et confirmer que `acceptedAnswer` n’apparaît dans le JSON-LD qu’après acceptation réelle par un modérateur.
-
-## Validation locale
-
-Tous les fichiers PHP transmis doivent être vérifiés avec `php -l`. Les fixtures publiques doivent rester limitées au domaine `example.test`. Le dépôt ne doit jamais recevoir d’export SQL, de mot de passe, de cookie de session ou d’adresse d’administration réelle.
+Le public GitHub ne contient que du code, des fixtures synthétiques en `example.test` et des archives assainies. Consultez `docs/DEVELOPER-HANDOFF-20260825.md` pour la procédure de reprise et `CHANGELOG.md` pour l’historique de release.

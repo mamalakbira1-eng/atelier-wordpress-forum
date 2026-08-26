@@ -51,6 +51,12 @@ body .atelier-header__search-wrap{position:relative;flex:none}body .atelier-head
 .atelier-contribution h2 a,.atelier-contribution h2 a:visited,.atelier-search-result h3 a:visited,.atelier-notifications li>a:visited{color:var(--atelier-ink)}
 .atelier-contribution h2 a:hover,.atelier-contribution h2 a:focus-visible,.atelier-contribution h2 a:active,.atelier-search-result h3 a:hover,.atelier-search-result h3 a:focus-visible,.atelier-notifications li>a:hover,.atelier-notifications li>a:focus-visible{color:var(--atelier-vermilion)}
 
+/* Atelier — arabe : chaque bloc dont le contenu est arabe reste RTL, lisible et typographiquement autonome. */
+.atelier-thread h1[dir="rtl"],.atelier-initial-post__content[dir="rtl"],.atelier-reply__content[dir="rtl"]{direction:rtl;text-align:right;font-family:"Noto Naskh Arabic",Tahoma,Arial,sans-serif;letter-spacing:0}
+.atelier-initial-post__content[dir="rtl"],.atelier-reply__content[dir="rtl"]{font-size:clamp(19px,1.55vw,23px);line-height:2}
+.atelier-initial-post__content[dir="rtl"]>* ,.atelier-reply__content[dir="rtl"]>*{text-align:right}
+@media(max-width:700px){.atelier-initial-post__content[dir="rtl"],.atelier-reply__content[dir="rtl"]{font-size:20px;line-height:2.05}}
+
 /* Atelier — vote utile : action secondaire visible, réversible et cohérente avec le vermillon de la communauté. */
 .atelier-vote-button.is-active{border-color:var(--atelier-vermilion);background:var(--atelier-faint);color:var(--atelier-vermilion)}
 .atelier-vote-button:disabled{cursor:wait;opacity:.62}

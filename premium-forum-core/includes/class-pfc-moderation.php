@@ -70,23 +70,30 @@ final class PFC_Moderation {
 		foreach ( $items as $item ) {
 			$author = get_userdata( $item->post_author );
 			$type = 'topic' === $item->post_type ? 'Sujet' : 'Réponse';
-			echo '<tr><td>' . esc_html( $type ) . '</td><td><strong>' . esc_html( wp_trim_words( $item->post_title ?: wp_strip_all_tags( $item->post_content ), 18 ) ) . '</strong><p>' . esc_html( wp_trim_words( $item->post_content, 28 ) ) . '</p></td><td>' . esc_html( $author ? $author->display_name : 'Inconnu' ) . '</td><td>' . esc_html( get_the_date( 'd/m/Y H:i', $item ) ) . '</td><td>' . self::action_link( $item->ID, 'approve', 'Publier' ) . ' ' . self::action_link( $item->ID, 'reject', 'Refuser' ) . ' ' . self::action_link( $item->ID, 'trash', 'Supprimer' ) . '</td></tr>';
+				echo '<tr><td>' . esc_html( $type ) . '</td><td><strong>' . esc_html( wp_trim_words( $item->post_title ?: wp_strip_all_tags( $item->post_content ), 18 ) ) . '</strong><p>' . esc_html( wp_trim_words( $item->post_content, 28 ) ) . '</p></td><td>' . esc_html( $author ? $author->display_name : 'Inconnu' ) . '</td><td>' . esc_html( get_the_date( 'd/m/Y H:i', $item ) ) . '</td><td>' . self::action_form( $item->ID, 'approve', 'Publier' ) . self::action_form( $item->ID, 'reject', 'Refuser' ) . self::action_form( $item->ID, 'trash', 'Supprimer' ) . '</td></tr>';
 		}
 		echo '</tbody></table></section></div>';
 	}
 
-	private static function action_link( int $post_id, string $action, string $label ): string {
-		$url = add_query_arg( array( 'action' => 'pfc_moderate', 'post_id' => $post_id, 'decision' => $action ), admin_url( 'admin-post.php' ) );
-		return '<a class="button-link' . ( 'trash' === $action ? ' button-link-delete' : '' ) . '" href="' . esc_url( wp_nonce_url( $url, 'pfc_moderate_' . $post_id ) ) . '">' . esc_html( $label ) . '</a>';
+	private static function action_form( int $post_id, string $action, string $label ): string {
+		$class = 'button button-small' . ( 'trash' === $action ? ' button-link-delete' : '' );
+		return '<form method="post" action="' . esc_url( admin_url( 'admin-post.php' ) ) . '" style="display:inline-block;margin:0 6px 6px 0;">'
+			. '<input type="hidden" name="action" value="pfc_moderate">'
+			. '<input type="hidden" name="post_id" value="' . esc_attr( (string) $post_id ) . '">'
+			. '<input type="hidden" name="decision" value="' . esc_attr( $action ) . '">'
+			. wp_nonce_field( 'pfc_moderate_' . $post_id, '_wpnonce', false, false )
+			. '<button type="submit" class="' . esc_attr( $class ) . '">' . esc_html( $label ) . '</button></form>';
 	}
 
 	public static function handle_action(): void {
 		if ( ! self::can_moderate() ) { wp_die( 'Accès refusé.' ); }
-		$post_id = absint( $_GET['post_id'] ?? 0 );
-		$decision = sanitize_key( $_GET['decision'] ?? '' );
+		if ( 'POST' !== strtoupper( $_SERVER['REQUEST_METHOD'] ?? '' ) ) { wp_die( 'Méthode de requête invalide.' ); }
+		$post_id = absint( $_POST['post_id'] ?? 0 );
+		$decision = sanitize_key( wp_unslash( $_POST['decision'] ?? '' ) );
 		check_admin_referer( 'pfc_moderate_' . $post_id );
 		$post = get_post( $post_id );
 		if ( ! $post || ! in_array( $post->post_type, array( 'topic', 'reply' ), true ) ) { wp_die( 'Contribution introuvable.' ); }
+		if ( 'pending' !== $post->post_status || ! current_user_can( 'edit_post', $post_id ) ) { wp_die( 'Cette contribution ne peut plus être modérée.' ); }
 		$status = array( 'approve' => 'publish', 'reject' => 'draft', 'trash' => 'trash' )[ $decision ] ?? '';
 		if ( ! $status ) { wp_die( 'Action inconnue.' ); }
 		wp_update_post( array( 'ID' => $post_id, 'post_status' => $status ) );

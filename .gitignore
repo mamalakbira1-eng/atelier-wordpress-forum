@@ -5,6 +5,6 @@
 *.key
 *.crt
 wp-config.php
- cookies.txt
+cookies.txt
 *.log
 .DS_Store

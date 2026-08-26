@@ -1,68 +1,58 @@
 # Relais développeur — Atelier WordPress
 
-## Objet
+## État de référence
 
-Ce dépôt contient la base transmissible du forum WordPress **Atelier**, construit autour de bbPress et de l’extension **Premium Forum Core**. L’objectif produit est un forum public ultra lisible par les humains et les moteurs de recherche, avec une structure HTML explicite, des métadonnées JSON-LD prudentes et une séparation claire entre sujet, auteur, message initial, réponses, dates, source et interactions.
+Atelier est un forum WordPress public à vocation éditoriale, construit sur **WordPress 7.1**, **PHP 8.3** et **bbPress 2.6**. La référence source est le thème **Atelier 0.4.28** dans `atelier-0428/` et le plugin **Premium Forum Core 0.4.4** dans `premium-forum-core/`. Le dépôt public est une relève de code; il ne contient pas l’installation WordPress, les réglages de l’hébergeur, la base, les cookies, les comptes réels ou les identifiants.
 
-Le prochain développeur doit traiter ce dépôt comme la source de code et de documentation. Les utilisateurs, contenus et notifications réellement présents sur le staging ne sont pas versionnés ici. Aucun mot de passe, cookie, token, e-mail privé ou fichier `wp-config.php` ne doit être ajouté au dépôt public.
+La documentation à lire en premier est, dans cet ordre : `README.md`, `CHANGELOG.md`, `docs/senior-audit-findings-20260826.md`, `docs/google-seo-audit-basis-20260826.md` et `docs/prompts-audit-simulation-claude.md`.
 
-## État livré
+## Architecture et responsabilités
 
-| Domaine | État |
-|---|---|
-| Thème Atelier | Version 0.4.28, compatible bbPress, interface éditoriale premium et responsive |
-| Premium Forum Core | Version 0.4.2, import CSV, communauté, SEO, inscription et modération |
-| Interface forum | Accueil, forums, sujets, réponses, profils, recherche, création de sujet et espace membre |
-| UI sujet | Rail d’index, message initial avec auteur au-dessus du texte, cartes de réponses, votes, suivi, partage et tri |
-| Arabe | Détection de contenu, `dir="rtl"` et police Noto Naskh Arabic |
-| Inscription | Prénom, nom, pseudo suggéré, disponibilité AJAX, alternatives, validation serveur et code e-mail à six chiffres |
-| Sécurité inscription | Mot de passe d’au moins dix caractères, nonce, expiration de quinze minutes et cinq tentatives maximum |
-| Modération | File centrale « À valider », publication/refus/suppression et rôle Atelier Moderator |
-| Notifications | Notifications internes pour suivi et réponses ; appels e-mail transactionnels via `wp_mail()` |
-| Import | Mapping CSV, dry run, validation, journalisation, dates historiques, votes et rollback ciblé |
+| Couche | Dossier | Responsabilités |
+|---|---|---|
+| Présentation | `atelier/` | Accueil et archives, templates bbPress, navigation, recherche, login Atelier, design RTL, cache HTTP des lectures anonymes. |
+| Règles métier | `premium-forum-core/` | Inscription, pseudo, e-mail, modération, import CSV, rôles, votes, suivis, notifications, meta SEO et JSON-LD. |
+| Forum | bbPress | Types forum, sujet et réponse, compteurs, permissions de base et formulaires de contribution. |
+| Données importées | `fixtures/`, `.test-sandbox/` | Données synthétiques et jeux de validation seulement; ne pas les confondre avec une sauvegarde WordPress. |
+| Livraison | `release/` | Archives installables dont la racine doit exactement correspondre au répertoire WordPress attendu. |
 
-## Correctif d’inscription du 25 août 2026
+## Fonctionnalités prouvées sur staging
 
-L’erreur critique a été reproduite sur le staging en soumettant un compte de recette unique. L’utilisateur était créé avant que WordPress ne retourne l’écran critique. Le compte de reproduction est resté en base après le crash initial, ce qui montre que la rupture se produisait dans l’étape post-création, autour de la génération du code ou de l’envoi e-mail.
+L’accueil, les espaces, les archives de sujets, les profils, la recherche à suggestions, les sujets, le tri de réponses, les votes, les suivis, l’enregistrement, les badges Membre SVIP/Modérateur et l’espace membre sont rendus et testés. Les contenus arabes utilisent une direction RTL, alignement à droite et Noto Naskh Arabic pour les messages et réponses. Le rendu public est distinct de la session administrateur.
 
-Le handler `PFC_Registration::handle_register()` intercepte désormais les exceptions `Throwable` autour de la génération du code, de l’écriture des métadonnées et de `wp_mail()`. Le nettoyage du compte est également protégé. Si le serveur ne peut pas envoyer l’e-mail, l’utilisateur reçoit un message contrôlé et le compte incomplet est supprimé ; le site ne montre plus une erreur critique WordPress.
+L’inscription demande identité, pseudo suggéré, e-mail, mot de passe et confirmation. Le pseudo est revalidé côté serveur. La demande de code est protégée par un honeypot et une limitation appliquée après validation des champs; le retour négatif de `wp_mail()` nettoie le compte incomplet et rend une erreur contrôlée. Le SMTP de staging n’étant pas configuré, la réception réelle n’est pas certifiée.
 
-Le retest staging a produit le message attendu : **« L’e-mail n’a pas pu être envoyé. Aucun compte n’a été conservé ; réessayez plus tard. »** Le pseudo de ce second compte de recette a ensuite été confirmé comme disponible, ce qui vérifie le nettoyage. La cause opérationnelle restante est l’absence de configuration SMTP fonctionnelle : `wp_mail()` retourne actuellement `false` sur ce staging. Le SMTP doit être configuré avant de considérer l’inscription comme prête pour une ouverture publique.
+La file de modération centralise les sujets et réponses en attente. Les décisions publier, refuser et supprimer sont des formulaires `POST` avec nonce et capacité appropriée. Les notifications internes ne sont créées que pour les réponses `publish`, sont dédupliquées, et les suivis exigent un sujet `publish`. Les artefacts PFC communautaires sont nettoyés lorsqu’un compte ou une contribution disparaît.
 
-## Correctif de cache de connexion
+## SEO, lisibilité machine et cache
 
-Le thème charge désormais `login.css` avec la date de modification du fichier comme version de ressource. Cela évite que LiteSpeed ou le cache de l’hébergeur ne serve une ancienne feuille CSS après une correction. Sur desktop, `body.login` utilise `overflow-y: auto` et le bouton de connexion ou d’inscription reste atteignable. La règle mobile conserve son défilement propre.
+Le HTML sépare titre, forum, auteur, rôle, message initial, réponses, dates, sources et actions. Les sujets publics émettent `DiscussionForumPosting` et `BreadcrumbList`; il n’existe pas de `QAPage` ni d’`acceptedAnswer` sans workflow d’acceptation réel. L’accueil et les sujets ont des titres de marque, descriptions adaptées et canoniques auto-référents. Les URL d’import historiques gardent les dates importées lorsque la donnée est valide.
 
-## Installation recommandée
+Le cache public est limité aux lecteurs anonymes. Les pages de connexion et les sessions restent privées et non cachées. Après toute mise à jour de thème/plugin touchant au rendu ou aux métadonnées, purger LiteSpeed/CDN puis contrôler une requête fraîche et une requête chaude : un cache préexistant peut sinon continuer de diffuser un ancien `<head>`.
 
-Installer bbPress, puis téléverser l’archive Premium Forum Core 0.4.2 depuis `release/`. Téléverser ensuite l’archive Atelier 0.4.28 depuis `release/` et activer le thème. Après installation, vérifier les permaliens, purger LiteSpeed et contrôler les hooks bbPress.
+## Procédure de modification et de déploiement
 
-Créer d’abord un environnement de staging, effectuer un **dry run** de l’import CSV, examiner le journal, puis lancer l’import uniquement après sauvegarde. Les fichiers de `fixtures/` sont des données de recette et utilisent des adresses `example.test`; ils ne doivent pas être importés tels quels en production.
+Commencez par les contrôles locaux ci-dessous. Construisez ensuite une archive avec la bonne racine, testez-la par `unzip -t`, puis installez-la via l’interface WordPress fraîche. Ne réutilisez jamais un lien WordPress de remplacement contenant un nonce expiré. Enfin, testez le rendu public en navigation privée et consignez le résultat.
 
-## Reprise prioritaire
+```bash
+find atelier premium-forum-core -name '*.php' -print0 | xargs -0 -n1 php -l
+php tools/test-pfc-validation.php .test-sandbox/packs/valid .test-sandbox/packs/invalid
+unzip -t release/<archive>.zip
+python3 prepare_public_repo.py
+```
 
-Le prochain développeur doit configurer un SMTP transactionnel et tester l’envoi vers une boîte de recette contrôlée. Il doit ensuite ajouter ou vérifier un anti-spam compatible avec l’inscription et la publication, finaliser les pages RGPD, CGU et politique de confidentialité, et vérifier l’accessibilité clavier des actions communautaires.
+Avant tout push public, régénérez `atelier-wordpress-public` et recherchez notamment des secrets, mots de passe, cookies, adresses privées, exports, tokens, URL d’administration et domaine de staging. Un changement de code doit être accompagné d’un changelog, d’une preuve de test et d’un numéro de version cohérent.
 
-Il devra aussi contrôler que le JSON-LD `QAPage` ou `acceptedAnswer` n’est généré que lorsqu’une réponse est réellement acceptée par un modérateur, jamais automatiquement pour chaque sujet. Les notifications internes doivent être testées séparément des e-mails, car elles peuvent fonctionner alors que le transport SMTP est indisponible.
+## Limites et priorités restantes
 
-Enfin, il devra reprendre les tests avec deux comptes de recette séparés : un compte membre ordinaire et un compte modérateur. Les identifiants et mots de passe ne sont volontairement pas inclus dans ce dépôt public ; ils doivent être définis directement dans le staging et remplacés avant toute mise en ligne.
+| Priorité | Élément | Condition de clôture |
+|---|---|---|
+| P1 | SMTP/délivrabilité | SMTP ou mail catcher configuré; code réellement reçu; en-têtes et SPF/DKIM/DMARC vérifiés. |
+| P2 | Performance réelle | Mesure CWV mobile et desktop sur production ou préproduction représentative; ne pas inférer LCP, INP ou CLS de requêtes `curl`. |
+| P2 | Charge et intégrations | Test autorisé à faible charge, santé WordPress et conflits avec les extensions réellement prévues. |
+| P2 | Production SEO | Domaine final, HTTPS, redirections, sitemap/robots, retrait du noindex seulement après recette et purge cache. |
+| P3 | Workflow Q&A | N’ajouter `QAPage`/`acceptedAnswer` qu’après conception du rôle qui accepte une réponse, audits de visibilité et test de données structurées. |
 
-## Fichiers à lire en premier
+## Règles non négociables du dépôt
 
-| Fichier | Rôle |
-|---|---|
-| `atelier/functions.php` | Enqueue, routes, helpers de rang, détection arabe et navigation |
-| `atelier/bbpress/content-single-topic.php` | Structure principale d’une discussion |
-| `atelier/login.css` | Connexion, inscription, vérification et responsive |
-| `premium-forum-core/includes/class-pfc-registration.php` | Inscription, pseudo, code e-mail et blocage avant vérification |
-| `premium-forum-core/includes/class-pfc-moderation.php` | Rôle et file de modération |
-| `premium-forum-core/includes/class-pfc-community.php` | Votes, suivi, notifications et e-mails de réponse |
-| `premium-forum-core/includes/class-pfc-seo.php` | Données structurées et règles SEO |
-| `premium-forum-core/includes/class-pfc-importer.php` | Import CSV, validation, dry run, journal et rollback |
-| `docs/registration-0428.md` | Parcours d’inscription et règles de sécurité |
-| `docs/moderation-and-username-0428.md` | Disponibilité du pseudo et modération |
-| `docs/visual-parity-20260825.md` | Intentions visuelles et comparaison avec le prototype |
-
-## Règle de sécurité du dépôt
-
-Ne jamais ajouter à GitHub un mot de passe de staging, une adresse d’administration, un cookie de session, un token, un export SQL contenant des utilisateurs réels ou un fichier de configuration. Les accès doivent être transmis hors dépôt, puis révoqués ou remplacés avant toute ouverture publique.
+Ne publiez jamais de mots de passe, clés, tokens, cookies, `wp-config.php`, exports SQL, journaux contenant des données membres, identifiants personnels, captures d’administration ou URL privées. Utilisez `example.test` dans les fixtures. Les comptes et contenus de recette doivent être supprimés ou rendus manifestement synthétiques après une simulation.

@@ -10,6 +10,8 @@ final class PFC_Registration {
 	private const META_HASH    = '_pfc_email_code_hash';
 	private const META_EXPIRES = '_pfc_email_code_expires';
 	private const META_ATTEMPTS = '_pfc_email_code_attempts';
+	private const META_RESEND_AT = '_pfc_email_code_resend_at';
+	private const REGISTER_RATE_LIMIT = 5;
 
 	public static function init(): void {
 		add_action( 'login_init', array( __CLASS__, 'route_login' ) );
@@ -74,6 +76,9 @@ final class PFC_Registration {
 		if ( ! isset( $_POST['pfc_register_nonce'] ) || ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['pfc_register_nonce'] ) ), 'pfc_register' ) ) {
 			self::render_register( array( 'error' => __( 'La session du formulaire a expiré. Rechargez la page.', 'premium-forum-core' ) ) );
 		}
+		if ( ! empty( $_POST['pfc_website'] ?? '' ) ) {
+			self::render_register( array( 'error' => __( 'Votre demande n’a pas pu être traitée. Rechargez la page avant de réessayer.', 'premium-forum-core' ) ) );
+		}
 		$first = sanitize_text_field( wp_unslash( $_POST['first_name'] ?? '' ) );
 		$last  = sanitize_text_field( wp_unslash( $_POST['last_name'] ?? '' ) );
 		$email = sanitize_email( wp_unslash( $_POST['user_email'] ?? '' ) );
@@ -88,6 +93,9 @@ final class PFC_Registration {
 		if ( strlen( $pass ) < 10 ) $errors[] = __( 'Le mot de passe doit contenir au moins 10 caractères.', 'premium-forum-core' );
 		if ( $pass !== $pass2 ) $errors[] = __( 'Les deux mots de passe ne correspondent pas.', 'premium-forum-core' );
 		if ( ! empty( $errors ) ) self::render_register( array( 'error' => implode( ' ', $errors ), 'first' => $first, 'last' => $last, 'email' => $email, 'login' => $login ) );
+		if ( ! self::allow_register_request() ) {
+			self::render_register( array( 'error' => __( 'Trop de demandes ont été envoyées depuis cette connexion. Réessayez dans une heure.', 'premium-forum-core' ) ) );
+		}
 		$user_id = wp_insert_user( array( 'user_login' => $login, 'user_pass' => $pass, 'user_email' => $email, 'first_name' => $first, 'last_name' => $last, 'display_name' => trim( $first . ' ' . $last ), 'role' => 'subscriber' ) );
 		if ( is_wp_error( $user_id ) ) self::render_register( array( 'error' => $user_id->get_error_message(), 'first' => $first, 'last' => $last, 'email' => $email, 'login' => $login ) );
 		$sent = false;
@@ -136,21 +144,45 @@ final class PFC_Registration {
 		$email = sanitize_email( wp_unslash( $_POST['user_email'] ?? '' ) );
 		$user = get_user_by( 'email', $email );
 		if ( ! $user || ! get_user_meta( $user->ID, self::META_PENDING, true ) ) self::render_verify( array( 'error' => __( 'Cette demande de confirmation est introuvable.', 'premium-forum-core' ), 'email' => $email ) );
-		$code = (string) random_int( 100000, 999999 );
-		update_user_meta( $user->ID, self::META_HASH, wp_hash_password( $code ) );
-		update_user_meta( $user->ID, self::META_EXPIRES, time() + 15 * MINUTE_IN_SECONDS );
-		update_user_meta( $user->ID, self::META_ATTEMPTS, 0 );
-		wp_mail( $email, __( 'Votre nouveau code Atelier', 'premium-forum-core' ), sprintf( __( "Votre nouveau code de confirmation Atelier est : %s\n\nIl est valable 15 minutes.", 'premium-forum-core' ), $code ) );
+		$now = time();
+		$last_resend = (int) get_user_meta( $user->ID, self::META_RESEND_AT, true );
+		if ( $last_resend > 0 && $last_resend > ( $now - MINUTE_IN_SECONDS ) ) {
+			self::render_verify( array( 'error' => __( 'Attendez une minute avant de demander un nouveau code.', 'premium-forum-core' ), 'email' => $email ) );
+		}
+		$sent = false;
+		try {
+			$code = function_exists( 'random_int' ) ? (string) random_int( 100000, 999999 ) : (string) wp_rand( 100000, 999999 );
+			update_user_meta( $user->ID, self::META_HASH, wp_hash_password( $code ) );
+			update_user_meta( $user->ID, self::META_EXPIRES, $now + 15 * MINUTE_IN_SECONDS );
+			update_user_meta( $user->ID, self::META_ATTEMPTS, 0 );
+			$sent = wp_mail( $email, __( 'Votre nouveau code Atelier', 'premium-forum-core' ), sprintf( __( "Votre nouveau code de confirmation Atelier est : %s\n\nIl est valable 15 minutes.", 'premium-forum-core' ), $code ) );
+		} catch ( \Throwable $exception ) {
+			error_log( 'PFC registration resend failure: ' . $exception->getMessage() );
+		}
+		if ( ! $sent ) {
+			self::render_verify( array( 'error' => __( 'Le nouveau code n’a pas pu être envoyé. Réessayez plus tard.', 'premium-forum-core' ), 'email' => $email ) );
+		}
+		update_user_meta( $user->ID, self::META_RESEND_AT, $now );
 		self::render_verify( array( 'success' => __( 'Un nouveau code vient d’être envoyé.', 'premium-forum-core' ), 'email' => $email ) );
 	}
 
 	private static function valid_nonce( string $field, string $action ): bool { return isset( $_POST[ $field ] ) && wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST[ $field ] ) ), $action ); }
+	private static function allow_register_request(): bool {
+		$remote_address = sanitize_text_field( wp_unslash( $_SERVER['REMOTE_ADDR'] ?? '' ) );
+		if ( '' === $remote_address ) return true;
+		$key = 'pfc_reg_rate_' . substr( hash_hmac( 'sha256', $remote_address, wp_salt( 'nonce' ) ), 0, 24 );
+		$record = get_transient( $key );
+		$count = is_array( $record ) ? (int) ( $record['count'] ?? 0 ) : 0;
+		if ( $count >= self::REGISTER_RATE_LIMIT ) return false;
+		set_transient( $key, array( 'count' => $count + 1 ), HOUR_IN_SECONDS );
+		return true;
+	}
 	private static function login_url( string $action ): string { return add_query_arg( 'action', $action, wp_login_url() ); }
 
 	private static function render_register( array $state = array() ): void {
 		login_header( __( 'Créer un compte Atelier', 'premium-forum-core' ), '', new WP_Error( 'pfc_register', $state['error'] ?? '' ) );
 		$first = esc_attr( $state['first'] ?? '' ); $last = esc_attr( $state['last'] ?? ''); $email = esc_attr( $state['email'] ?? '' ); $login = esc_attr( $state['login'] ?? '' );
-		echo '<main class="atelier-auth-card atelier-register-card"><p class="atelier-kicker">Nouvelle archive membre</p><h2>Créer votre accès Atelier.</h2><p class="atelier-auth-lead">Une identité claire pour contribuer, suivre les discussions et retrouver vos sources.</p><form name="registerform" id="registerform" action="' . esc_url( self::login_url( 'register' ) ) . '" method="post" novalidate><input type="hidden" name="pfc_register_nonce" value="' . esc_attr( wp_create_nonce( 'pfc_register' ) ) . '"><div class="atelier-form-grid"><p><label for="first_name">Prénom</label><input id="first_name" name="first_name" type="text" value="' . $first . '" autocomplete="given-name" required></p><p><label for="last_name">Nom</label><input id="last_name" name="last_name" type="text" value="' . $last . '" autocomplete="family-name" required></p></div><p><label for="user_email">Adresse e-mail</label><input id="user_email" name="user_email" type="email" value="' . $email . '" autocomplete="email" required></p><p><label for="user_login">Votre pseudo <span>(modifiable)</span></label><input id="user_login" name="user_login" type="text" value="' . $login . '" autocomplete="username" required><small id="atelier-username-hint">Nous vous proposerons un pseudo à partir de votre nom.</small><span id="atelier-username-status" class="atelier-username-status" role="status" aria-live="polite"></span><div id="atelier-username-alternatives" class="atelier-username-alternatives" hidden></div></p><div class="atelier-form-grid"><p><label for="user_pass">Mot de passe</label><input id="user_pass" name="user_pass" type="password" autocomplete="new-password" minlength="10" required></p><p><label for="user_pass_confirm">Confirmation</label><input id="user_pass_confirm" name="user_pass_confirm" type="password" autocomplete="new-password" minlength="10" required></p></div><p class="atelier-password-note">10 caractères minimum. Votre compte restera inactif jusqu’à la confirmation de l’adresse.</p><p class="submit"><button type="submit" class="button button-primary">Recevoir mon code <span>↗</span></button></p></form><p class="atelier-auth-switch">Vous avez déjà un accès ? <a href="' . esc_url( wp_login_url() ) . '">Se connecter</a></p></main><script>(function(){const f=document.getElementById("first_name"),l=document.getElementById("last_name"),u=document.getElementById("user_login"),s=document.getElementById("atelier-username-status"),a=document.getElementById("atelier-username-alternatives");let timer;function suggest(){if(!u.dataset.edited){u.value=(f.value+"."+l.value).toLowerCase().normalize("NFD").replace(/[\\u0300-\\u036f]/g,"").replace(/[^a-z0-9.]/g,"").replace(/^\\.|\\.$/g,"");}check();}function check(){clearTimeout(timer);const value=u.value.trim();a.hidden=true;a.innerHTML="";if(!value){s.textContent="";return;}s.textContent="Vérification…";timer=setTimeout(()=>{fetch("' . esc_url( admin_url( 'admin-ajax.php' ) ) . '?action=pfc_check_username&username="+encodeURIComponent(value)+"&nonce=' . esc_attr( wp_create_nonce( 'pfc_username_check' ) ) . '",{credentials:"same-origin"}).then(r=>r.json()).then(d=>{const x=d.data||{};s.textContent=x.message||"";s.className="atelier-username-status "+(x.available?"is-available":"is-taken");if(!x.available&&(x.suggestions||[]).length){a.hidden=false;a.innerHTML="Suggestions : "+x.suggestions.map(v=>"<button type=\\"button\\" data-username=\\""+v+"\\">"+v+"</button>").join("");a.querySelectorAll("button").forEach(b=>b.onclick=()=>{u.value=b.dataset.username;u.dataset.edited="1";check();});}}).catch(()=>{s.textContent="";});},280);} [f,l].forEach(e=>e.addEventListener("input",suggest));u.addEventListener("input",()=>{u.dataset.edited="1";check();});suggest();})();</script>';
+		echo '<main class="atelier-auth-card atelier-register-card"><p class="atelier-kicker">Nouvelle archive membre</p><h2>Créer votre accès Atelier.</h2><p class="atelier-auth-lead">Une identité claire pour contribuer, suivre les discussions et retrouver vos sources.</p><form name="registerform" id="registerform" action="' . esc_url( self::login_url( 'register' ) ) . '" method="post" novalidate><input type="hidden" name="pfc_register_nonce" value="' . esc_attr( wp_create_nonce( 'pfc_register' ) ) . '"><div class="pfc-honeypot" aria-hidden="true"><label for="pfc_website">Site web</label><input id="pfc_website" name="pfc_website" type="text" tabindex="-1" autocomplete="off"></div><div class="atelier-form-grid"><p><label for="first_name">Prénom</label><input id="first_name" name="first_name" type="text" value="' . $first . '" autocomplete="given-name" required></p><p><label for="last_name">Nom</label><input id="last_name" name="last_name" type="text" value="' . $last . '" autocomplete="family-name" required></p></div><p><label for="user_email">Adresse e-mail</label><input id="user_email" name="user_email" type="email" value="' . $email . '" autocomplete="email" required></p><p><label for="user_login">Votre pseudo <span>(modifiable)</span></label><input id="user_login" name="user_login" type="text" value="' . $login . '" autocomplete="username" required><small id="atelier-username-hint">Nous vous proposerons un pseudo à partir de votre nom.</small><span id="atelier-username-status" class="atelier-username-status" role="status" aria-live="polite"></span><div id="atelier-username-alternatives" class="atelier-username-alternatives" hidden></div></p><div class="atelier-form-grid"><p><label for="user_pass">Mot de passe</label><input id="user_pass" name="user_pass" type="password" autocomplete="new-password" minlength="10" required></p><p><label for="user_pass_confirm">Confirmation</label><input id="user_pass_confirm" name="user_pass_confirm" type="password" autocomplete="new-password" minlength="10" required></p></div><p class="atelier-password-note">10 caractères minimum. Votre compte restera inactif jusqu’à la confirmation de l’adresse.</p><p class="submit"><button type="submit" class="button button-primary">Recevoir mon code <span>↗</span></button></p></form><p class="atelier-auth-switch">Vous avez déjà un accès ? <a href="' . esc_url( wp_login_url() ) . '">Se connecter</a></p></main><script>(function(){const f=document.getElementById("first_name"),l=document.getElementById("last_name"),u=document.getElementById("user_login"),s=document.getElementById("atelier-username-status"),a=document.getElementById("atelier-username-alternatives");let timer;function suggest(){if(!u.dataset.edited){u.value=(f.value+"."+l.value).toLowerCase().normalize("NFD").replace(/[\\u0300-\\u036f]/g,"").replace(/[^a-z0-9.]/g,"").replace(/^\\.|\\.$/g,"");}check();}function check(){clearTimeout(timer);const value=u.value.trim();a.hidden=true;a.innerHTML="";if(!value){s.textContent="";return;}s.textContent="Vérification…";timer=setTimeout(()=>{fetch("' . esc_url( admin_url( 'admin-ajax.php' ) ) . '?action=pfc_check_username&username="+encodeURIComponent(value)+"&nonce=' . esc_attr( wp_create_nonce( 'pfc_username_check' ) ) . '",{credentials:"same-origin"}).then(r=>r.json()).then(d=>{const x=d.data||{};s.textContent=x.message||"";s.className="atelier-username-status "+(x.available?"is-available":"is-taken");if(!x.available&&(x.suggestions||[]).length){a.hidden=false;a.innerHTML="Suggestions : "+x.suggestions.map(v=>"<button type=\\"button\\" data-username=\\""+v+"\\">"+v+"</button>").join("");a.querySelectorAll("button").forEach(b=>b.onclick=()=>{u.value=b.dataset.username;u.dataset.edited="1";check();});}}).catch(()=>{s.textContent="";});},280);} [f,l].forEach(e=>e.addEventListener("input",suggest));u.addEventListener("input",()=>{u.dataset.edited="1";check();});suggest();})();</script>';
 		login_footer();
 		exit;
 	}
