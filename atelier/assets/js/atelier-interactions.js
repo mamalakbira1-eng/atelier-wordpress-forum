@@ -13,13 +13,13 @@
       let controller;
       let debounce;
       let activeIndex = -1;
-      const close = () => { panel.hidden = true; panel.innerHTML = ''; input.setAttribute('aria-expanded', 'false'); activeIndex = -1; };
+      let suppressSearchOnFocus = false;
+      const close = () => { panel.hidden = true; panel.innerHTML = ''; activeIndex = -1; };
       const render = (items, query) => {
         panel.innerHTML = items.length
           ? `<p class="atelier-search-suggestions__heading">Sources trouvées</p><div role="listbox">${items.map((item, index) => `<a class="atelier-search-suggestions__item" role="option" aria-selected="false" data-index="${index}" href="${escapeAttribute(item.url)}"><span><strong>${escapeHtml(item.title)}</strong><small>${escapeHtml(item.kind)} · ${escapeHtml(item.meta)}</small></span><b aria-hidden="true">↗</b></a>`).join('')}</div><button class="atelier-search-suggestions__all" type="submit" form="${form.id}">Voir tous les résultats pour « ${escapeHtml(query)} »</button>`
           : `<p class="atelier-search-suggestions__empty">Aucune source directe pour « ${escapeHtml(query)} ».</p><button class="atelier-search-suggestions__all" type="submit" form="${form.id}">Voir tous les résultats</button>`;
         panel.hidden = false;
-        input.setAttribute('aria-expanded', 'true');
       };
       const updateActive = (index) => { const options = [...panel.querySelectorAll('[role="option"]')]; if (!options.length) return; activeIndex = (index + options.length) % options.length; options.forEach((option, optionIndex) => option.setAttribute('aria-selected', String(optionIndex === activeIndex))); options[activeIndex].focus({ preventScroll: true }); };
       const search = async () => {
@@ -30,7 +30,8 @@
       };
       input.addEventListener('input', () => { window.clearTimeout(debounce); debounce = window.setTimeout(search, 130); });
       input.addEventListener('keydown', (event) => { if (event.key === 'ArrowDown') { event.preventDefault(); updateActive(activeIndex + 1); } if (event.key === 'ArrowUp') { event.preventDefault(); updateActive(activeIndex - 1); } if (event.key === 'Escape') { close(); input.focus(); } });
-      input.addEventListener('focus', () => { if (input.value.trim().length >= Number(searchConfig.minChars || 2)) search(); });
+      panel.addEventListener('keydown', (event) => { if (event.key === 'Escape') { event.preventDefault(); close(); suppressSearchOnFocus = true; input.focus(); window.setTimeout(() => { suppressSearchOnFocus = false; }, 0); } });
+      input.addEventListener('focus', () => { if (!suppressSearchOnFocus && input.value.trim().length >= Number(searchConfig.minChars || 2)) search(); });
       document.addEventListener('click', (event) => { if (!form.parentElement.contains(event.target)) close(); });
     });
   }

@@ -2,6 +2,20 @@
 
 Ce changelog décrit les artefacts de référence livrés avec le dépôt public. Il ne contient ni accès, ni données de production, ni exports de base.
 
+## Atelier 0.4.31 et Premium Forum Core 0.4.16 — consolidation préproduction, 26 août 2026
+
+Les références finales deviennent le thème **Atelier 0.4.31**, livré dans `release/atelier-0.4.31-search-escape-complete.zip`, et **Premium Forum Core 0.4.16**, livré dans `release/premium-forum-core-0.4.16-security-headers-complete.zip`. Les versions PFC 0.4.12 à 0.4.15 sont des étapes intermédiaires de développement et ne sont pas publiées comme releases distinctes.
+
+| Domaine | Évolution consolidée |
+|---|---|
+| Accessibilité et clavier | Contrastes ciblés, noms accessibles d’actions, sémantique de recherche et fermeture des suggestions par Échap, y compris après navigation par flèche. |
+| Sécurité HTTP | Blocage explicite XML-RPC, indisponibilité des mots de passe d’application et en-têtes `X-Content-Type-Options`, `X-Frame-Options`, `Referrer-Policy` et `Permissions-Policy` sur le public et la connexion. |
+| Inscription | La correction e-mail 0.4.11 est conservée dans la release finale; l’expiration de code et le nettoyage du compte de recette sont validés avec données synthétiques. |
+| Modération et import | Séparation membre/modérateur/administrateur testée; dry run, import journalisé et rollback ciblé sont validés avec un pack synthétique. |
+| Exploitation | Les extensions et thèmes inactifs ont été nettoyés sur le staging; une sauvegarde complète locale de clôture a été créée. |
+
+> **Limite de la release.** Deux sauvegardes locales ne remplacent ni une copie distante, ni une restauration isolée testée. La délivrabilité e-mail de production, le domaine final, les DNS d’authentification et les mesures terrain restent des prérequis avant ouverture publique.
+
 ## Premium Forum Core 0.4.11 — stabilisation e-mail de recette, 26 août 2026
 
 La référence plugin devient **Premium Forum Core 0.4.11**, livrée dans `release/premium-forum-core-0.4.11-registration-stabilized.zip`. Le thème de référence reste Atelier 0.4.28.

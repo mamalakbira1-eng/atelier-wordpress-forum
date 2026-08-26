@@ -1,7 +1,7 @@
 # Rapport d’audit senior — Atelier WordPress / Premium Forum Core
 
 **Date :** 26 août 2026
-**Périmètre :** thème Atelier 0.4.28, Premium Forum Core 0.4.11, bbPress 2.6, WordPress 7.1, PHP 8.3, staging de recette.
+**Périmètre :** thème Atelier 0.4.31, Premium Forum Core 0.4.16, bbPress 2.6, WordPress 7.1, PHP 8.3, staging de recette.
 **Auteur :** Manus AI
 
 ## Résumé exécutif
@@ -22,8 +22,8 @@ Les mesures HTTP présentées ci-dessous sont des instantanés de staging. Elles
 
 | Élément | Référence validée | Observations |
 |---|---|---|
-| Thème | Atelier 0.4.28, racine `atelier-0428/` | Archive installable : `release/atelier-0.4.28-active-theme-senior-audit.zip`. |
-| Plugin | Premium Forum Core 0.4.11 | Archive installable : `release/premium-forum-core-0.4.11-registration-stabilized.zip`. |
+| Thème | Atelier 0.4.31, racine `atelier/` | Archive installable : `release/atelier-0.4.31-search-escape-complete.zip`. |
+| Plugin | Premium Forum Core 0.4.16 | Archive installable : `release/premium-forum-core-0.4.16-security-headers-complete.zip`. |
 | Forum | bbPress 2.6 | Types forum, topic, reply et compteurs natifs conservés. |
 | Staging | WordPress 7.1 / PHP 8.3 | Dissuasion d’indexation active pendant toute la recette. |
 | Dépôt public | Code, fixtures synthétiques, docs et releases | Aucun secret, export ou accès staging ne doit être ajouté. |
@@ -43,6 +43,9 @@ Les mesures HTTP présentées ci-dessous sont des instantanés de staging. Elles
 | P2-COM-004 | P2 | Profil | Nonce utilisateur explicite avant modification de rang. | Validation syntaxique et déploiement PFC 0.4.3+. |
 | P2-SEO-001 | P2 | Marque et canonique | Titres Atelier, fil `Atelier`, canonique d’accueil explicite et sujet canonique sans paramètre. | Rendu anonyme frais : un canonique auto-référent pour l’accueil; sujet avec canonique, titre et schémas attendus. |
 | P2-RTL-001 | P2 | Arabe | `dir=rtl`, alignement à droite et Noto Naskh Arabic sur message initial et réponses. | Styles calculés : direction RTL, police arabe, interlignage ≈ 38 px. |
+| P1-SEC-001 | P1 | Surface d’administration distante | XML-RPC est refusé explicitement, les mots de passe d’application sont désactivés et les en-têtes de sécurité sont appliqués au public comme à la connexion. | Requête XML-RPC contrôlée en 403; en-têtes présents sur les deux contextes. |
+| P2-A11Y-002 | P2 | Recherche et contrôles | Noms accessibles, contraste ciblé, sémantique de recherche et fermeture Échap ont été corrigés dans Atelier 0.4.31. | Saisie, flèche bas, puis Échap : suggestions fermées et focus rendu au champ. |
+| P2-IMP-002 | P2 | Import de recette | Dry run, import réel journalisé et rollback immédiat ont été rejoués avec un pack synthétique. | Le rollback ne retire que les objets créés par le job sélectionné. |
 
 ## Fonctionnalités validées
 
@@ -68,11 +71,11 @@ L’accueil émet une meta description et un canonique auto-référent. Le stagi
 | Sujet public | Premier `miss`, puis `hit` chaud | Même directive publique | TTFB ≈ 1,94–2,07 s; HTML ≈ 52,4 kB. |
 | Connexion | `200`, non cacheable | `no-store, private` et contrôle LiteSpeed `no-cache` | TTFB ≈ 2,30 s; HTML ≈ 9,9 kB. |
 
-Le comportement de cache est cohérent : lectures publiques cacheables, session et connexion privées. Toutefois, les valeurs TTFB de staging ne suffisent pas à prouver la conformité CWV. Avant production, mesurer LCP, INP et CLS avec outils de terrain ou laboratoire sur une infrastructure comparable à la production. [3]
+Le comportement de cache est cohérent : lectures publiques cacheables, session et connexion privées. Une baseline Lighthouse de laboratoire a aussi couvert accueil, forums, sujet, connexion et inscription avec cache actif : score performance mobile 82–95, score desktop 65–75, LCP synthétique 1,88–3,11 s et CLS 0–0,02. Ces résultats ont permis de prioriser les correctifs, mais ne sont ni CrUX ni RUM et ne prouvent pas la conformité CWV. Une fenêtre d’instabilité HTTP/2/TLS a interrompu la contre-mesure automatisée après mise à jour; ce risque d’hébergement reste à vérifier séparément. Avant production, mesurer LCP, INP et CLS avec outils de terrain ou laboratoire sur une infrastructure comparable à la production. [3]
 
 ## Accessibilité et permissions
 
-Le contrôle du rendu anonyme a confirmé `lang="fr-FR"`, un lien d’évitement vers le contenu principal, aucune image sans `alt`, aucun bouton sans nom accessible et aucune ancre interne vers une cible absente. La navigation anonyme vers l’action « Suivre » redirige vers la connexion sans modifier le sujet. Les actions d’écriture et de suivi restent donc protégées au lieu d’apparaître comme des succès illusoires.
+Le contrôle du rendu anonyme a confirmé `lang="fr-FR"`, un lien d’évitement vers le contenu principal, aucune image sans `alt`, aucun bouton sans nom accessible et aucune ancre interne vers une cible absente. L’automate Lighthouse a guidé des corrections ciblées de contraste, de libellés et de sémantique; le parcours de recherche au clavier flèche bas puis Échap a été rejoué après correction. La navigation anonyme vers l’action « Suivre » redirige vers la connexion sans modifier le sujet. Les actions d’écriture et de suivi restent donc protégées au lieu d’apparaître comme des succès illusoires.
 
 La validation structurelle ne remplace pas un audit complet avec lecteur d’écran, navigation clavier exhaustive, contraste mesuré et tests utilisateurs âgés. Ces étapes restent recommandées avant production, notamment pour les formulaires, la modération et les états asynchrones.
 
@@ -81,7 +84,10 @@ La validation structurelle ne remplace pas un audit complet avec lecteur d’éc
 | Priorité | Risque ou limite | Décision requise |
 |---|---|---|
 | P1 | Délivrabilité de production non prouvée. | Mailtrap Sandbox est validé sur staging; configurer ensuite le fournisseur transactionnel, l’expéditeur final et SPF/DKIM/DMARC, puis tester des boîtes réelles avant production. |
-| P2 | CWV non mesurés en conditions représentatives. | Lancer une mesure mobile/desktop et RUM ou équivalent après déploiement préproduction. |
+| P1 | Sauvegarde distante et restauration non prouvées. | Deux jeux locaux complets existent; configurer une copie indépendante et restaurer dans un environnement isolé avant bêta. |
+| P2 | CWV non mesurés en conditions représentatives. | Une baseline Lighthouse existe; lancer une mesure mobile/desktop et RUM ou équivalent après déploiement préproduction. |
+| P2 | Exécution cron hôte non vérifiée. | Santé du site est redevenue saine, mais vérifier une tâche cron serveur et son exécution sous trafic nul dès accès à l’hébergement. |
+| P2 | Instabilité HTTP/2/TLS ponctuelle du staging. | Diagnostiquer avec l’hébergeur avant d’interpréter les mesures de performance ultérieures. |
 | P2 | Tests de charge et compatibilité complète des extensions non exécutés. | Effectuer une charge limitée et autorisée, puis consulter Santé du site et les logs. |
 | P2 | Cache peut servir un ancien `<head>` après mise à jour. | Purger LiteSpeed/CDN après chaque mise à jour d’actifs, de SEO ou de templates; revalider requête fraîche et chaude. |
 | P3 | Aucun workflow de réponse acceptée. | Ne pas implémenter QAPage/acceptedAnswer avant conception de la règle métier, autorisations et audit UI. |

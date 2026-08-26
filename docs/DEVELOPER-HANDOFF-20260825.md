@@ -2,16 +2,16 @@
 
 ## État de référence
 
-Atelier est un forum WordPress public à vocation éditoriale, construit sur **WordPress 7.1**, **PHP 8.3** et **bbPress 2.6**. La référence source est le thème **Atelier 0.4.28** dans `atelier-0428/` et le plugin **Premium Forum Core 0.4.11** dans `premium-forum-core/`. Le dépôt public est une relève de code; il ne contient pas l’installation WordPress, les réglages de l’hébergeur, la base, les cookies, les comptes réels ou les identifiants.
+Atelier est un forum WordPress public à vocation éditoriale, construit sur **WordPress 7.1**, **PHP 8.3** et **bbPress 2.6**. La référence source est le thème **Atelier 0.4.31** dans `atelier/` et le plugin **Premium Forum Core 0.4.16** dans `premium-forum-core/`. Le dépôt public est une relève de code; il ne contient pas l’installation WordPress, les réglages de l’hébergeur, la base, les cookies, les comptes réels ou les identifiants.
 
-La documentation à lire en premier est, dans cet ordre : `README.md`, `CHANGELOG.md`, `docs/email-temporary-domain-options-20260826.md`, `docs/senior-audit-findings-20260826.md`, `docs/google-seo-audit-basis-20260826.md` et `docs/prompts-audit-simulation-claude.md`.
+La documentation à lire en premier est, dans cet ordre : `README.md`, `CHANGELOG.md`, `docs/preproduction-runbook-20260826.md`, `docs/email-temporary-domain-options-20260826.md`, `docs/senior-audit-findings-20260826.md`, `docs/google-seo-audit-basis-20260826.md` et `docs/prompts-audit-simulation-claude.md`.
 
 ## Architecture et responsabilités
 
 | Couche | Dossier | Responsabilités |
 |---|---|---|
-| Présentation | `atelier/` | Accueil et archives, templates bbPress, navigation, recherche, login Atelier, design RTL, cache HTTP des lectures anonymes. |
-| Règles métier | `premium-forum-core/` | Inscription, pseudo, e-mail, modération, import CSV, rôles, votes, suivis, notifications, meta SEO et JSON-LD. |
+| Présentation | `atelier/` | Accueil et archives, templates bbPress, navigation, recherche, login Atelier, design RTL, cache HTTP des lectures anonymes et parcours clavier de suggestions. |
+| Règles métier | `premium-forum-core/` | Inscription, pseudo, e-mail, modération, import CSV, rôles, votes, suivis, notifications, meta SEO, JSON-LD et protections XML-RPC/en-têtes HTTP. |
 | Forum | bbPress | Types forum, sujet et réponse, compteurs, permissions de base et formulaires de contribution. |
 | Données importées | `fixtures/`, `.test-sandbox/` | Données synthétiques et jeux de validation seulement; ne pas les confondre avec une sauvegarde WordPress. |
 | Livraison | `release/` | Archives installables dont la racine doit exactement correspondre au répertoire WordPress attendu. |
@@ -24,7 +24,9 @@ L’inscription demande identité, pseudo suggéré, e-mail, mot de passe et con
 
 Easy WP SMTP et Mailtrap Email Sandbox constituent uniquement un mail catcher de staging. Aucun e-mail réel n’a été utilisé. Cette preuve ne remplace pas la délivrabilité de production, qui reste conditionnée par le domaine final, un fournisseur transactionnel, SPF, DKIM, DMARC et des essais vers de vraies boîtes de réception.
 
-La file de modération centralise les sujets et réponses en attente. Les décisions publier, refuser et supprimer sont des formulaires `POST` avec nonce et capacité appropriée. Les notifications internes ne sont créées que pour les réponses `publish`, sont dédupliquées, et les suivis exigent un sujet `publish`. Les artefacts PFC communautaires sont nettoyés lorsqu’un compte ou une contribution disparaît.
+La file de modération centralise les sujets et réponses en attente. Les décisions publier, refuser et supprimer sont des formulaires `POST` avec nonce et capacité appropriée. Les scénarios membre ordinaire → contenu en attente → publication ou suppression par modérateur ont été rejoués, puis les comptes synthétiques temporaires ont été supprimés. Les notifications internes ne sont créées que pour les réponses `publish`, sont dédupliquées, et les suivis exigent un sujet `publish`. Les artefacts PFC communautaires sont nettoyés lorsqu’un compte ou une contribution disparaît.
+
+PFC 0.4.16 bloque explicitement XML-RPC, désactive les mots de passe d’application et applique les en-têtes `X-Content-Type-Options`, `X-Frame-Options`, `Referrer-Policy` et `Permissions-Policy` sur les pages publiques et de connexion. Ne pas ajouter de CSP stricte sans un inventaire spécifique des scripts, styles et extensions réellement chargés; ne pas activer HSTS dans le code du thème, car ce réglage relève du domaine et de l’hébergement final.
 
 ## SEO, lisibilité machine et cache
 
@@ -50,11 +52,13 @@ Avant tout push public, régénérez `atelier-wordpress-public` et recherchez no
 | Priorité | Élément | Condition de clôture |
 |---|---|---|
 | P1 | Délivrabilité de production | Mailtrap Sandbox est validé pour le staging; choisir l’expéditeur final, authentifier le domaine avec SPF/DKIM/DMARC et tester de vraies boîtes avant ouverture publique. |
-| P2 | Performance réelle | Mesure CWV mobile et desktop sur production ou préproduction représentative; ne pas inférer LCP, INP ou CLS de requêtes `curl`. |
+| P1 | Restauration et stockage distant | Deux sauvegardes locales complètes existent, mais aucune copie distante ni restauration isolée n’est encore prouvée. Suivre `docs/preproduction-runbook-20260826.md`. |
+| P2 | Performance réelle | Une baseline Lighthouse de staging existe; mesurer CWV et RUM sur une préproduction ou production représentative, sans inférer LCP, INP ou CLS de requêtes `curl`. |
+| P2 | Cron hôte | L’alerte Action Scheduler a disparu de Santé du site, mais la tâche cron serveur et sa continuité sous trafic nul ne sont pas inspectées. |
 | P2 | Charge et intégrations | Test autorisé à faible charge, santé WordPress et conflits avec les extensions réellement prévues. |
 | P2 | Production SEO | Domaine final, HTTPS, redirections, sitemap/robots, retrait du noindex seulement après recette et purge cache. |
 | P3 | Workflow Q&A | N’ajouter `QAPage`/`acceptedAnswer` qu’après conception du rôle qui accepte une réponse, audits de visibilité et test de données structurées. |
 
 ## Règles non négociables du dépôt
 
-Ne publiez jamais de mots de passe, clés, tokens, cookies, `wp-config.php`, exports SQL, journaux contenant des données membres, identifiants personnels, captures d’administration ou URL privées. Utilisez `example.test` dans les fixtures. Les comptes et contenus de recette doivent être supprimés ou rendus manifestement synthétiques après une simulation.
+Ne publiez jamais de mots de passe, clés, tokens, cookies, `wp-config.php`, exports SQL, sauvegardes, journaux contenant des données membres, identifiants personnels, captures d’administration ou URL privées. Utilisez `example.test` dans les fixtures. Les comptes et contenus de recette doivent être supprimés ou rendus manifestement synthétiques après une simulation.
