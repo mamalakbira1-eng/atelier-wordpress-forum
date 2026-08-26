@@ -10,8 +10,8 @@ final class PFC_Registration {
 	private const META_HASH    = '_pfc_email_code_hash';
 	private const META_EXPIRES = '_pfc_email_code_expires';
 	private const META_ATTEMPTS = '_pfc_email_code_attempts';
-	private const META_RESEND_AT = '_pfc_email_code_resend_at';
-	private const REGISTER_RATE_LIMIT = 5;
+		private const META_RESEND_AT = '_pfc_email_code_resend_at';
+		private const REGISTER_RATE_LIMIT = 5;
 
 	public static function init(): void {
 		add_action( 'login_init', array( __CLASS__, 'route_login' ) );
@@ -29,8 +29,11 @@ final class PFC_Registration {
 			}
 			self::render_register();
 		}
-		if ( 'verify' === $action && 'POST' === strtoupper( $_SERVER['REQUEST_METHOD'] ?? '' ) ) {
-			self::handle_verify();
+			if ( 'verify' === $action ) {
+				if ( 'POST' === strtoupper( $_SERVER['REQUEST_METHOD'] ?? '' ) ) {
+					self::handle_verify();
+				}
+				self::render_verify();
 		}
 		if ( 'resend' === $action && 'POST' === strtoupper( $_SERVER['REQUEST_METHOD'] ?? '' ) ) {
 			self::handle_resend();
@@ -102,18 +105,21 @@ final class PFC_Registration {
 		try {
 			$code = function_exists( 'random_int' ) ? (string) random_int( 100000, 999999 ) : (string) wp_rand( 100000, 999999 );
 			update_user_meta( $user_id, self::META_PENDING, 1 );
-			update_user_meta( $user_id, self::META_HASH, wp_hash_password( $code ) );
-			update_user_meta( $user_id, self::META_EXPIRES, time() + 15 * MINUTE_IN_SECONDS );
-			update_user_meta( $user_id, self::META_ATTEMPTS, 0 );
-			$sent = wp_mail( $email, __( 'Votre code de confirmation Atelier', 'premium-forum-core' ), sprintf( __( "Bonjour %1$s,\n\nVotre code de confirmation Atelier est : %2$s\n\nIl est valable 15 minutes. Si vous n’êtes pas à l’origine de cette demande, ignorez ce message.", 'premium-forum-core' ), $first, $code ) );
-		} catch ( \Throwable $exception ) {
-			error_log( 'PFC registration mail failure: ' . $exception->getMessage() );
-		}
-		if ( ! $sent ) {
-			try {
-				wp_delete_user( $user_id );
-			} catch ( \Throwable $exception ) {
-				error_log( 'PFC registration cleanup failure: ' . $exception->getMessage() );
+				update_user_meta( $user_id, self::META_HASH, wp_hash_password( $code ) );
+				update_user_meta( $user_id, self::META_EXPIRES, time() + 15 * MINUTE_IN_SECONDS );
+				update_user_meta( $user_id, self::META_ATTEMPTS, 0 );
+					$sent = self::send_verification_mail( $email, __( 'Votre code de confirmation Atelier', 'premium-forum-core' ), sprintf( __( 'Bonjour %1$s,\n\nVotre code de confirmation Atelier est : %2$s\n\nIl est valable 15 minutes. Si vous n’êtes pas à l’origine de cette demande, ignorez ce message.', 'premium-forum-core' ), $first, $code ) );
+				} catch ( \Throwable $exception ) {
+					error_log( 'PFC registration mail setup failed.' );
+			}
+			if ( ! $sent ) {
+				try {
+					if ( ! function_exists( 'wp_delete_user' ) ) {
+						require_once ABSPATH . 'wp-admin/includes/user.php';
+					}
+					wp_delete_user( $user_id );
+				} catch ( \Throwable $exception ) {
+					error_log( 'PFC registration cleanup failed.' );
 			}
 			self::render_register( array( 'error' => __( 'L’e-mail n’a pas pu être envoyé. Aucun compte n’a été conservé ; réessayez plus tard.', 'premium-forum-core' ), 'first' => $first, 'last' => $last, 'email' => $email, 'login' => $login ) );
 		}
@@ -122,10 +128,10 @@ final class PFC_Registration {
 
 	private static function handle_verify(): void {
 		if ( ! self::valid_nonce( 'pfc_verify_nonce', 'pfc_verify' ) ) self::render_verify( array( 'error' => __( 'La session du formulaire a expiré. Rechargez la page.', 'premium-forum-core' ) ) );
-		$email = sanitize_email( wp_unslash( $_POST['user_email'] ?? '' ) );
-		$code  = preg_replace( '/\D+/', '', (string) ( $_POST['verification_code'] ?? '' ) );
-		$user  = get_user_by( 'email', $email );
-		if ( ! $user || ! get_user_meta( $user->ID, self::META_PENDING, true ) ) self::render_verify( array( 'error' => __( 'Cette demande de confirmation est introuvable.', 'premium-forum-core' ), 'email' => $email ) );
+			$email = sanitize_email( wp_unslash( $_POST['user_email'] ?? '' ) );
+			$code  = preg_replace( '/\D+/', '', (string) ( $_POST['verification_code'] ?? '' ) );
+			$user  = get_user_by( 'email', $email );
+			if ( ! $user || ! get_user_meta( $user->ID, self::META_PENDING, true ) ) self::render_verify( array( 'error' => __( 'L’adresse ou le code ne permet pas de confirmer cette demande.', 'premium-forum-core' ), 'email' => $email ) );
 		$attempts = (int) get_user_meta( $user->ID, self::META_ATTEMPTS, true );
 		if ( $attempts >= 5 ) self::render_verify( array( 'error' => __( 'Trop de tentatives. Demandez un nouveau code.', 'premium-forum-core' ), 'email' => $email ) );
 		update_user_meta( $user->ID, self::META_ATTEMPTS, $attempts + 1 );
@@ -143,7 +149,7 @@ final class PFC_Registration {
 		if ( ! self::valid_nonce( 'pfc_resend_nonce', 'pfc_resend' ) ) self::render_verify( array( 'error' => __( 'La session du formulaire a expiré. Rechargez la page.', 'premium-forum-core' ) ) );
 		$email = sanitize_email( wp_unslash( $_POST['user_email'] ?? '' ) );
 		$user = get_user_by( 'email', $email );
-		if ( ! $user || ! get_user_meta( $user->ID, self::META_PENDING, true ) ) self::render_verify( array( 'error' => __( 'Cette demande de confirmation est introuvable.', 'premium-forum-core' ), 'email' => $email ) );
+			if ( ! $user || ! get_user_meta( $user->ID, self::META_PENDING, true ) ) self::render_verify( array( 'error' => __( 'L’adresse ou le code ne permet pas de confirmer cette demande.', 'premium-forum-core' ), 'email' => $email ) );
 		$now = time();
 		$last_resend = (int) get_user_meta( $user->ID, self::META_RESEND_AT, true );
 		if ( $last_resend > 0 && $last_resend > ( $now - MINUTE_IN_SECONDS ) ) {
@@ -152,21 +158,43 @@ final class PFC_Registration {
 		$sent = false;
 		try {
 			$code = function_exists( 'random_int' ) ? (string) random_int( 100000, 999999 ) : (string) wp_rand( 100000, 999999 );
-			update_user_meta( $user->ID, self::META_HASH, wp_hash_password( $code ) );
-			update_user_meta( $user->ID, self::META_EXPIRES, $now + 15 * MINUTE_IN_SECONDS );
-			update_user_meta( $user->ID, self::META_ATTEMPTS, 0 );
-			$sent = wp_mail( $email, __( 'Votre nouveau code Atelier', 'premium-forum-core' ), sprintf( __( "Votre nouveau code de confirmation Atelier est : %s\n\nIl est valable 15 minutes.", 'premium-forum-core' ), $code ) );
-		} catch ( \Throwable $exception ) {
-			error_log( 'PFC registration resend failure: ' . $exception->getMessage() );
+				update_user_meta( $user->ID, self::META_HASH, wp_hash_password( $code ) );
+				update_user_meta( $user->ID, self::META_EXPIRES, $now + 15 * MINUTE_IN_SECONDS );
+				update_user_meta( $user->ID, self::META_ATTEMPTS, 0 );
+					$sent = self::send_verification_mail( $email, __( 'Votre nouveau code Atelier', 'premium-forum-core' ), sprintf( __( "Votre nouveau code de confirmation Atelier est : %s\n\nIl est valable 15 minutes.", 'premium-forum-core' ), $code ) );
+				} catch ( \Throwable $exception ) {
+					error_log( 'PFC registration resend setup failed.' );
 		}
 		if ( ! $sent ) {
 			self::render_verify( array( 'error' => __( 'Le nouveau code n’a pas pu être envoyé. Réessayez plus tard.', 'premium-forum-core' ), 'email' => $email ) );
 		}
-		update_user_meta( $user->ID, self::META_RESEND_AT, $now );
-		self::render_verify( array( 'success' => __( 'Un nouveau code vient d’être envoyé.', 'premium-forum-core' ), 'email' => $email ) );
-	}
+			update_user_meta( $user->ID, self::META_RESEND_AT, $now );
+			self::render_verify( array( 'success' => __( 'Un nouveau code vient d’être envoyé.', 'premium-forum-core' ), 'email' => $email ) );
+		}
 
-	private static function valid_nonce( string $field, string $action ): bool { return isset( $_POST[ $field ] ) && wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST[ $field ] ) ), $action ); }
+			private static function send_verification_mail( string $recipient, string $subject, string $message ): bool {
+			$failure_message = '';
+			$listener = static function ( $error ) use ( &$failure_message ): void {
+				if ( $error instanceof WP_Error ) {
+					$failure_message = sanitize_text_field( $error->get_error_message() );
+				}
+			};
+			add_action( 'wp_mail_failed', $listener );
+			try {
+				$sent = wp_mail( $recipient, $subject, $message, array( 'Content-Type: text/plain; charset=UTF-8' ) );
+			} catch ( \Throwable $exception ) {
+				$failure_message = sanitize_text_field( $exception->getMessage() );
+				$sent = false;
+			} finally {
+				remove_action( 'wp_mail_failed', $listener );
+			}
+				if ( ! $sent ) {
+					error_log( 'PFC registration email could not be sent.' );
+				}
+				return $sent;
+			}
+
+		private static function valid_nonce( string $field, string $action ): bool { return isset( $_POST[ $field ] ) && wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST[ $field ] ) ), $action ); }
 	private static function allow_register_request(): bool {
 		$remote_address = sanitize_text_field( wp_unslash( $_SERVER['REMOTE_ADDR'] ?? '' ) );
 		if ( '' === $remote_address ) return true;
@@ -187,10 +215,11 @@ final class PFC_Registration {
 		exit;
 	}
 
-	private static function render_verify( array $state = array() ): void {
-		login_header( __( 'Confirmer votre adresse Atelier', 'premium-forum-core' ), '', new WP_Error( 'pfc_verify', $state['error'] ?? '' ) );
-		$email = esc_attr( $state['email'] ?? '' );
-		echo '<main class="atelier-auth-card atelier-verify-card"><p class="atelier-kicker">Dernier repère</p><h2>Confirmer votre adresse.</h2><p class="atelier-auth-lead">Votre code à six chiffres vous attend dans votre boîte de réception. Il reste valable pendant 15 minutes.</p><form action="' . esc_url( self::login_url( 'verify' ) ) . '" method="post"><input type="hidden" name="pfc_verify_nonce" value="' . esc_attr( wp_create_nonce( 'pfc_verify' ) ) . '"><input type="hidden" name="user_email" value="' . $email . '"><p><label for="verification_code">Code de confirmation</label><input id="verification_code" name="verification_code" type="text" inputmode="numeric" pattern="[0-9]{6}" maxlength="6" autocomplete="one-time-code" placeholder="000000" required></p><p class="submit"><button type="submit" class="button button-primary">Valider mon adresse <span>↗</span></button></p></form><form class="atelier-resend-form" action="' . esc_url( self::login_url( 'resend' ) ) . '" method="post"><input type="hidden" name="pfc_resend_nonce" value="' . esc_attr( wp_create_nonce( 'pfc_resend' ) ) . '"><input type="hidden" name="user_email" value="' . $email . '"><button type="submit" class="atelier-text-button">Renvoyer un code</button></form><p class="atelier-auth-switch"><a href="' . esc_url( wp_login_url() ) . '">Retourner à la connexion</a></p></main>';
+		private static function render_verify( array $state = array() ): void {
+			login_header( __( 'Confirmer votre adresse Atelier', 'premium-forum-core' ), '', new WP_Error( 'pfc_verify', $state['error'] ?? '' ) );
+			$email = esc_attr( $state['email'] ?? '' );
+			$email_input = '' !== $email ? '<input type="hidden" name="user_email" value="' . $email . '">' : '<p><label for="user_email">Adresse e-mail utilisée à l’inscription</label><input id="user_email" name="user_email" type="email" autocomplete="email" required></p>';
+			echo '<main class="atelier-auth-card atelier-verify-card"><p class="atelier-kicker">Dernier repère</p><h2>Confirmer votre adresse.</h2><p class="atelier-auth-lead">Votre code à six chiffres vous attend dans votre boîte de réception. Il reste valable pendant 15 minutes.</p><form action="' . esc_url( self::login_url( 'verify' ) ) . '" method="post"><input type="hidden" name="pfc_verify_nonce" value="' . esc_attr( wp_create_nonce( 'pfc_verify' ) ) . '"><input type="hidden" name="pfc_resend_nonce" value="' . esc_attr( wp_create_nonce( 'pfc_resend' ) ) . '">' . $email_input . '<p><label for="verification_code">Code de confirmation</label><input id="verification_code" name="verification_code" type="text" inputmode="numeric" pattern="[0-9]{6}" maxlength="6" autocomplete="one-time-code" placeholder="000000" required></p><p class="submit"><button type="submit" class="button button-primary">Valider mon adresse <span>↗</span></button></p><p class="atelier-resend-form"><button type="submit" formaction="' . esc_url( self::login_url( 'resend' ) ) . '" formnovalidate class="atelier-text-button">Renvoyer un code</button></p></form><p class="atelier-auth-switch"><a href="' . esc_url( wp_login_url() ) . '">Retourner à la connexion</a></p></main>';
 		login_footer();
 		exit;
 	}

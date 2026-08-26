@@ -1,14 +1,14 @@
 # Rapport d’audit senior — Atelier WordPress / Premium Forum Core
 
 **Date :** 26 août 2026
-**Périmètre :** thème Atelier 0.4.28, Premium Forum Core 0.4.4, bbPress 2.6, WordPress 7.1, PHP 8.3, staging de recette.
+**Périmètre :** thème Atelier 0.4.28, Premium Forum Core 0.4.11, bbPress 2.6, WordPress 7.1, PHP 8.3, staging de recette.
 **Auteur :** Manus AI
 
 ## Résumé exécutif
 
 Le forum Atelier dispose maintenant d’un socle WordPress/bbPress cohérent pour une recette avancée : interface éditoriale, contenus français et arabes RTL, import CSV contrôlé, inscription sécurisée, modération centralisée, interactions communautaires et balisage conçu pour une lecture machine prudente. Les constats P1 et P2 prouvés au cours de l’audit ont été corrigés, validés localement puis déployés sur le staging.
 
-Le niveau de préparation est **satisfaisant pour poursuivre la recette et préparer une préproduction**, mais **pas encore suffisant pour déclarer la production prête**. La barrière principale est la délivrabilité : le staging ne dispose pas d’un SMTP vérifiable. Les Core Web Vitals, la charge réelle, les conflits avec le jeu complet d’extensions et la recette mobile réelle restent à mesurer. Le staging demeure en `noindex, nofollow`, ce qui est la décision correcte avant migration.
+Le niveau de préparation est **satisfaisant pour poursuivre la recette et préparer une préproduction**, mais **pas encore suffisant pour déclarer la production prête**. Mailtrap Email Sandbox valide désormais le transport et le flux de confirmation sur staging, sans prouver la délivrabilité publique. Les Core Web Vitals, la charge réelle, les conflits avec le jeu complet d’extensions et la recette mobile réelle restent à mesurer. Le staging demeure en `noindex, nofollow`, ce qui est la décision correcte avant migration.
 
 > Le SEO aide Google à comprendre, explorer et découvrir le contenu; il ne constitue pas une promesse de classement. Les signaux SEO, les données structurées et les performances doivent donc être testés et maintenus, non simplement ajoutés au code. [1]
 
@@ -23,7 +23,7 @@ Les mesures HTTP présentées ci-dessous sont des instantanés de staging. Elles
 | Élément | Référence validée | Observations |
 |---|---|---|
 | Thème | Atelier 0.4.28, racine `atelier-0428/` | Archive installable : `release/atelier-0.4.28-active-theme-senior-audit.zip`. |
-| Plugin | Premium Forum Core 0.4.4 | Archive installable : `release/premium-forum-core-0.4.4-senior-audit.zip`. |
+| Plugin | Premium Forum Core 0.4.11 | Archive installable : `release/premium-forum-core-0.4.11-registration-stabilized.zip`. |
 | Forum | bbPress 2.6 | Types forum, topic, reply et compteurs natifs conservés. |
 | Staging | WordPress 7.1 / PHP 8.3 | Dissuasion d’indexation active pendant toute la recette. |
 | Dépôt public | Code, fixtures synthétiques, docs et releases | Aucun secret, export ou accès staging ne doit être ajouté. |
@@ -33,6 +33,7 @@ Les mesures HTTP présentées ci-dessous sont des instantanés de staging. Elles
 | ID | Gravité initiale | Domaine | Correctif appliqué | Preuve de validation |
 |---|---|---|---|---|
 | P1-REG-001 | P1 | Inscription / SMTP | Exceptions et retour `false` de `wp_mail()` gérés lors de l’envoi et du renvoi; compte incomplet supprimé; délai de renvoi de 60 s. | Échec SMTP simulé : erreur contrôlée et absence de compte résiduel. |
+| P1-REG-003 | P1 | Inscription / reprise | Correction de l’interpolation PHP de l’e-mail initial et reprise GET de `action=verify` sans adresse dans l’URL; erreurs de renvoi non énumératives. | Création synthétique, Mailtrap Sandbox, renvoi, confirmation, redirection de succès et suppression du compte de recette rejoués. |
 | P1-REG-002 | P1 | Anti-abus | Honeypot hors navigation et limite horaire appliquée après validation des champs. | Soumission bot rejetée sans compte; erreurs invalides répétées sans consommation indue du quota. |
 | P1-MOD-001 | P1 | Publication / notification | Seules les réponses `publish` notifient; un suivi exige un sujet `publish`. | Chaîne contribution en attente → modération → visibilité publique rejouée. |
 | P1-IMP-001 | P1 | Import CSV | Maximum 4 fichiers, 5 Mo/fichier et 20 Mo/pack; mots de passe en clair refusés. | Harnais local valide les jeux de données acceptés et rejetés. |
@@ -79,7 +80,7 @@ La validation structurelle ne remplace pas un audit complet avec lecteur d’éc
 
 | Priorité | Risque ou limite | Décision requise |
 |---|---|---|
-| P1 | SMTP non configuré : code de vérification non reçu sur staging. | Configurer mail catcher/SMTP transactionnel, tester réception et vérifier SPF/DKIM/DMARC avant production. |
+| P1 | Délivrabilité de production non prouvée. | Mailtrap Sandbox est validé sur staging; configurer ensuite le fournisseur transactionnel, l’expéditeur final et SPF/DKIM/DMARC, puis tester des boîtes réelles avant production. |
 | P2 | CWV non mesurés en conditions représentatives. | Lancer une mesure mobile/desktop et RUM ou équivalent après déploiement préproduction. |
 | P2 | Tests de charge et compatibilité complète des extensions non exécutés. | Effectuer une charge limitée et autorisée, puis consulter Santé du site et les logs. |
 | P2 | Cache peut servir un ancien `<head>` après mise à jour. | Purger LiteSpeed/CDN après chaque mise à jour d’actifs, de SEO ou de templates; revalider requête fraîche et chaude. |

@@ -1,19 +1,19 @@
 # Atelier — forum WordPress / bbPress
 
-Atelier est un forum WordPress lisible par les humains et les systèmes, construit avec **bbPress**, le thème **Atelier 0.4.28** et le plugin **Premium Forum Core 0.4.4**. Le thème porte l’interface éditoriale, le responsive et le RTL; PFC concentre les règles communautaires, d’inscription, d’import, de modération et de SEO.
+Atelier est un forum WordPress lisible par les humains et les systèmes, construit avec **bbPress**, le thème **Atelier 0.4.28** et le plugin **Premium Forum Core 0.4.11**. Le thème porte l’interface éditoriale, le responsive et le RTL; PFC concentre les règles communautaires, d’inscription, d’import, de modération et de SEO.
 
 ## Artefacts de référence
 
 | Composant | Archive installable | Répertoire attendu | Rôle |
 |---|---|---|---|
 | Thème | `release/atelier-0.4.28-active-theme-senior-audit.zip` | `atelier-0428/` | Interface publique, login Atelier, templates bbPress, RTL et cache public. |
-| Plugin | `release/premium-forum-core-0.4.4-senior-audit.zip` | `premium-forum-core/` | Inscription, modération, import CSV, votes, suivis, notifications et SEO. |
+| Plugin | `release/premium-forum-core-0.4.11-registration-stabilized.zip` | `premium-forum-core/` | Inscription, modération, import CSV, votes, suivis, notifications et SEO. |
 
 > **Point de déploiement critique.** Le thème réellement actif porte le nom de dossier `atelier-0428`. Une archive dont la racine est `atelier/` installe un autre thème et ne modifie pas le thème actif.
 
 ## Installation et mise à jour
 
-Installez bbPress, puis importez les archives via **Apparence → Thèmes** et **Extensions → Ajouter → Téléverser une extension**. Si WordPress annonce qu’un répertoire existe, choisissez le remplacement uniquement après sauvegarde des fichiers et de la base. Vérifiez que les versions visibles sont Atelier 0.4.28 et PFC 0.4.4, purgez LiteSpeed/CDN, puis contrôlez l’accueil et un sujet dans une fenêtre non connectée.
+Installez bbPress, puis importez les archives via **Apparence → Thèmes** et **Extensions → Ajouter → Téléverser une extension**. Si WordPress annonce qu’un répertoire existe, choisissez le remplacement uniquement après sauvegarde des fichiers et de la base. Vérifiez que les versions visibles sont Atelier 0.4.28 et PFC 0.4.11, purgez LiteSpeed/CDN, puis contrôlez l’accueil et un sujet dans une fenêtre non connectée.
 
 L’import d’historique se fait dans **Premium Forum → Importer**. Téléchargez les modèles fournis, exécutez d’abord un dry run, examinez les erreurs et le mapping, puis lancez l’import. Le rollback ne retire que les objets journalisés par un job sélectionné : il ne remplace jamais une sauvegarde complète de la base.
 
@@ -35,6 +35,6 @@ Le harnais CSV doit indiquer `"pass": true`. Pour le staging, reprendre ensuite 
 
 ## Sécurité et mise en production
 
-Le staging reste volontairement en `noindex, nofollow`. Avant production, configurez un SMTP transactionnel ou un mail catcher, testez réception et délivrabilité, puis vérifiez SPF, DKIM, DMARC et le domaine expéditeur. Les secrets SMTP, cookies, mots de passe, exports SQL, journaux de membres et URLs privées ne doivent jamais rejoindre ce dépôt.
+Le staging reste volontairement en `noindex, nofollow`. Le flux d’inscription PFC 0.4.11 a été validé avec Mailtrap Email Sandbox et une adresse synthétique : envoi, renvoi, reprise directe de vérification, confirmation et nettoyage du compte de recette. Ce mail catcher ne prouve pas la délivrabilité publique. Avant production, configurez le fournisseur transactionnel, le domaine expéditeur, SPF, DKIM et DMARC, puis testez la réception vers des boîtes réelles. Les secrets SMTP, cookies, mots de passe, exports SQL, journaux de membres et URLs privées ne doivent jamais rejoindre ce dépôt.
 
 Le public GitHub ne contient que du code, des fixtures synthétiques en `example.test` et des archives assainies. Consultez `docs/DEVELOPER-HANDOFF-20260825.md` pour la procédure de reprise et `CHANGELOG.md` pour l’historique de release.

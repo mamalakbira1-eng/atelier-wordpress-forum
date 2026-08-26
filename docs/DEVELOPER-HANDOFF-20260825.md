@@ -2,9 +2,9 @@
 
 ## État de référence
 
-Atelier est un forum WordPress public à vocation éditoriale, construit sur **WordPress 7.1**, **PHP 8.3** et **bbPress 2.6**. La référence source est le thème **Atelier 0.4.28** dans `atelier-0428/` et le plugin **Premium Forum Core 0.4.4** dans `premium-forum-core/`. Le dépôt public est une relève de code; il ne contient pas l’installation WordPress, les réglages de l’hébergeur, la base, les cookies, les comptes réels ou les identifiants.
+Atelier est un forum WordPress public à vocation éditoriale, construit sur **WordPress 7.1**, **PHP 8.3** et **bbPress 2.6**. La référence source est le thème **Atelier 0.4.28** dans `atelier-0428/` et le plugin **Premium Forum Core 0.4.11** dans `premium-forum-core/`. Le dépôt public est une relève de code; il ne contient pas l’installation WordPress, les réglages de l’hébergeur, la base, les cookies, les comptes réels ou les identifiants.
 
-La documentation à lire en premier est, dans cet ordre : `README.md`, `CHANGELOG.md`, `docs/senior-audit-findings-20260826.md`, `docs/google-seo-audit-basis-20260826.md` et `docs/prompts-audit-simulation-claude.md`.
+La documentation à lire en premier est, dans cet ordre : `README.md`, `CHANGELOG.md`, `docs/email-temporary-domain-options-20260826.md`, `docs/senior-audit-findings-20260826.md`, `docs/google-seo-audit-basis-20260826.md` et `docs/prompts-audit-simulation-claude.md`.
 
 ## Architecture et responsabilités
 
@@ -20,7 +20,9 @@ La documentation à lire en premier est, dans cet ordre : `README.md`, `CHANGELO
 
 L’accueil, les espaces, les archives de sujets, les profils, la recherche à suggestions, les sujets, le tri de réponses, les votes, les suivis, l’enregistrement, les badges Membre SVIP/Modérateur et l’espace membre sont rendus et testés. Les contenus arabes utilisent une direction RTL, alignement à droite et Noto Naskh Arabic pour les messages et réponses. Le rendu public est distinct de la session administrateur.
 
-L’inscription demande identité, pseudo suggéré, e-mail, mot de passe et confirmation. Le pseudo est revalidé côté serveur. La demande de code est protégée par un honeypot et une limitation appliquée après validation des champs; le retour négatif de `wp_mail()` nettoie le compte incomplet et rend une erreur contrôlée. Le SMTP de staging n’étant pas configuré, la réception réelle n’est pas certifiée.
+L’inscription demande identité, pseudo suggéré, e-mail, mot de passe et confirmation. Le pseudo est revalidé côté serveur. La demande de code est protégée par un honeypot et une limitation appliquée après validation des champs; le retour négatif de `wp_mail()` nettoie le compte incomplet et rend une erreur contrôlée. Le formulaire `action=verify` peut être repris en GET sans e-mail dans l’URL, avec une saisie locale de l’adresse si nécessaire. La confirmation et le renvoi ont été validés en Mailtrap Email Sandbox avec une adresse synthétique; après confirmation, les métadonnées pending, hash, expiration et tentatives sont supprimées.
+
+Easy WP SMTP et Mailtrap Email Sandbox constituent uniquement un mail catcher de staging. Aucun e-mail réel n’a été utilisé. Cette preuve ne remplace pas la délivrabilité de production, qui reste conditionnée par le domaine final, un fournisseur transactionnel, SPF, DKIM, DMARC et des essais vers de vraies boîtes de réception.
 
 La file de modération centralise les sujets et réponses en attente. Les décisions publier, refuser et supprimer sont des formulaires `POST` avec nonce et capacité appropriée. Les notifications internes ne sont créées que pour les réponses `publish`, sont dédupliquées, et les suivis exigent un sujet `publish`. Les artefacts PFC communautaires sont nettoyés lorsqu’un compte ou une contribution disparaît.
 
@@ -47,7 +49,7 @@ Avant tout push public, régénérez `atelier-wordpress-public` et recherchez no
 
 | Priorité | Élément | Condition de clôture |
 |---|---|---|
-| P1 | SMTP/délivrabilité | SMTP ou mail catcher configuré; code réellement reçu; en-têtes et SPF/DKIM/DMARC vérifiés. |
+| P1 | Délivrabilité de production | Mailtrap Sandbox est validé pour le staging; choisir l’expéditeur final, authentifier le domaine avec SPF/DKIM/DMARC et tester de vraies boîtes avant ouverture publique. |
 | P2 | Performance réelle | Mesure CWV mobile et desktop sur production ou préproduction représentative; ne pas inférer LCP, INP ou CLS de requêtes `curl`. |
 | P2 | Charge et intégrations | Test autorisé à faible charge, santé WordPress et conflits avec les extensions réellement prévues. |
 | P2 | Production SEO | Domaine final, HTTPS, redirections, sitemap/robots, retrait du noindex seulement après recette et purge cache. |
