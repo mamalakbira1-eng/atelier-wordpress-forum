@@ -353,7 +353,55 @@ final class PFC_Importer {
 				$summary['counts'][ $type ] = ( $summary['counts'][ $type ] ?? 0 ) + 1;
 			}
 		}
+		foreach ( self::validate_relationships( $pack ) as $issue ) {
+			$summary['errors'][] = array( 'file' => $issue['type'] . '.csv', 'row' => $issue['line'], 'message' => $issue['message'] );
+			self::add_item( $job_id, $issue['type'], $issue['legacy'], 0, 'error', $issue['line'], array( 'message' => $issue['message'] ) );
+		}
 		return $summary;
+	}
+
+	/**
+	 * Le dry run doit vérifier les dépendances avant toute écriture. Sans cela,
+	 * un échec de mapping lors de l'exécution peut laisser des utilisateurs ou
+	 * forums créés partiellement, même si le rollback est disponible.
+	 */
+	private static function validate_relationships( array $pack ): array {
+		$issues = array();
+		$sets   = array( 'users' => array(), 'forums' => array(), 'topics' => array(), 'replies' => array() );
+		$keys   = array( 'users' => 'legacy_user_id', 'forums' => 'legacy_forum_id', 'topics' => 'legacy_topic_id', 'replies' => 'legacy_reply_id' );
+		foreach ( $keys as $type => $key ) {
+			foreach ( $pack[ $type ] ?? array() as $row ) {
+				$value = trim( (string) ( $row[ $key ] ?? '' ) );
+				if ( '' !== $value ) {
+					$sets[ $type ][ $value ] = true;
+				}
+			}
+		}
+		$check = static function( string $type, array $row, string $field, array $known, string $label ) use ( &$issues ): void {
+			$value = trim( (string) ( $row[ $field ] ?? '' ) );
+			if ( '' === $value || isset( $known[ $value ] ) ) {
+				return;
+			}
+			$issues[] = array(
+				'type'    => $type,
+				'line'    => absint( $row['__line'] ?? 0 ),
+				'legacy'  => self::legacy_key( $type, $row ),
+				'message' => sprintf( 'Référence %s introuvable dans le pack : %s.', $label, $value ),
+			);
+		};
+		foreach ( $pack['forums'] ?? array() as $row ) {
+			$check( 'forums', $row, 'parent_legacy_forum_id', $sets['forums'], 'parent_legacy_forum_id' );
+		}
+		foreach ( $pack['topics'] ?? array() as $row ) {
+			$check( 'topics', $row, 'legacy_author_id', $sets['users'], 'legacy_author_id' );
+			$check( 'topics', $row, 'legacy_forum_id', $sets['forums'], 'legacy_forum_id' );
+		}
+		foreach ( $pack['replies'] ?? array() as $row ) {
+			$check( 'replies', $row, 'legacy_author_id', $sets['users'], 'legacy_author_id' );
+			$check( 'replies', $row, 'legacy_topic_id', $sets['topics'], 'legacy_topic_id' );
+			$check( 'replies', $row, 'legacy_parent_reply_id', $sets['replies'], 'legacy_parent_reply_id' );
+		}
+		return $issues;
 	}
 
 	private static function validate_row( string $type, array $row, array $required ): array {

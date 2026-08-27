@@ -85,6 +85,23 @@ final class PFC_Moderation {
 			. '<button type="submit" class="' . esc_attr( $class ) . '">' . esc_html( $label ) . '</button></form>';
 	}
 
+	/** Resynchronise uniquement les compteurs bbPress touchés par une décision PFC. */
+	private static function sync_bbpress_counts( WP_Post $post ): void {
+		if ( 'reply' === $post->post_type ) {
+			$topic_id = function_exists( 'bbp_get_reply_topic_id' ) ? (int) bbp_get_reply_topic_id( $post->ID ) : (int) $post->post_parent;
+			$forum_id = function_exists( 'bbp_get_reply_forum_id' ) ? (int) bbp_get_reply_forum_id( $post->ID ) : 0;
+			foreach ( array( 'bbp_update_topic_reply_count', 'bbp_update_topic_reply_count_hidden', 'bbp_update_topic_voice_count' ) as $callback ) {
+				if ( $topic_id && function_exists( $callback ) ) { $callback( $topic_id ); }
+			}
+		} else {
+			$forum_id = function_exists( 'bbp_get_topic_forum_id' ) ? (int) bbp_get_topic_forum_id( $post->ID ) : 0;
+		}
+
+		foreach ( array( 'bbp_update_forum_topic_count', 'bbp_update_forum_reply_count', 'bbp_update_forum_reply_count_hidden' ) as $callback ) {
+			if ( $forum_id && function_exists( $callback ) ) { $callback( $forum_id ); }
+		}
+	}
+
 	public static function handle_action(): void {
 		if ( ! self::can_moderate() ) { wp_die( 'Accès refusé.' ); }
 		if ( 'POST' !== strtoupper( $_SERVER['REQUEST_METHOD'] ?? '' ) ) { wp_die( 'Méthode de requête invalide.' ); }
@@ -96,7 +113,14 @@ final class PFC_Moderation {
 		if ( 'pending' !== $post->post_status || ! current_user_can( 'edit_post', $post_id ) ) { wp_die( 'Cette contribution ne peut plus être modérée.' ); }
 		$status = array( 'approve' => 'publish', 'reject' => 'draft', 'trash' => 'trash' )[ $decision ] ?? '';
 		if ( ! $status ) { wp_die( 'Action inconnue.' ); }
-		wp_update_post( array( 'ID' => $post_id, 'post_status' => $status ) );
+		if ( 'publish' === $status && 'reply' === $post->post_type && function_exists( 'bbp_approve_reply' ) ) {
+			bbp_approve_reply( $post_id );
+		} elseif ( 'publish' === $status && 'topic' === $post->post_type && function_exists( 'bbp_approve_topic' ) ) {
+			bbp_approve_topic( $post_id );
+		} else {
+			wp_update_post( array( 'ID' => $post_id, 'post_status' => $status ) );
+		}
+		self::sync_bbpress_counts( $post );
 		wp_safe_redirect( add_query_arg( 'pfc_moderation_notice', rawurlencode( 'Action appliquée.' ), admin_url( 'admin.php?page=pfc-moderation' ) ) );
 		exit;
 	}

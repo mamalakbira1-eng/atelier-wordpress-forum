@@ -91,11 +91,12 @@
         button.setAttribute('aria-pressed', String(Boolean(payload.data.voted)));
         const label = button.querySelector('[data-pfc-vote-label]');
         const count = button.querySelector('[data-pfc-vote-count]');
-        if (label) label.textContent = button.closest('.atelier-reply') ? 'utile' : 'Voter utile';
+        if (label) label.textContent = button.closest('.atelier-reply') ? ' utile' : 'Voter utile';
         if (count) count.textContent = String(payload.data.count);
+        if (button.closest('.atelier-reply') && count) button.setAttribute('aria-label', `${count.textContent} utile — Marquer cette réponse comme utile`);
       } catch (error) {
         const label = button.querySelector('[data-pfc-vote-label]');
-        if (label && error?.message) { label.textContent = button.closest('.atelier-reply') ? 'utile' : 'Voter utile'; button.setAttribute('aria-label', error.message); }
+        if (label && error?.message) { label.textContent = button.closest('.atelier-reply') ? ' utile' : 'Voter utile'; button.setAttribute('aria-label', error.message); }
       } finally { button.disabled = false; }
     }));
   }
