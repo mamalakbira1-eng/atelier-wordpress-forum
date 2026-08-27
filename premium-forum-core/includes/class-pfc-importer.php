@@ -342,10 +342,24 @@ final class PFC_Importer {
 				$summary['errors'][] = array( 'file' => $type . '.csv', 'row' => 0, 'message' => 'Fichier requis absent.' );
 				continue;
 			}
-			$summary['files']++;
-			foreach ( $pack[ $type ] as $line => $row ) {
-				$summary['rows']++;
-				$issues = self::validate_row( $type, $row, $schema['required'] );
+				$summary['files']++;
+				if ( empty( $pack[ $type ] ) ) {
+					$summary['errors'][] = array( 'file' => $type . '.csv', 'row' => 0, 'message' => 'Fichier requis vide.' );
+					self::add_item( $job_id, $type, '', 0, 'error', 0, array( 'message' => 'Fichier requis vide.' ) );
+					continue;
+				}
+				$legacy_field = self::schemas()[ $type ]['required'][0];
+				$seen_legacy = array();
+				foreach ( $pack[ $type ] as $line => $row ) {
+					$summary['rows']++;
+					$legacy_value = trim( (string) ( $row[ $legacy_field ] ?? '' ) );
+					$issues = self::validate_row( $type, $row, $schema['required'] );
+					if ( '' !== $legacy_value && isset( $seen_legacy[ $legacy_value ] ) ) {
+						$issues[] = sprintf( 'Identifiant legacy dupliqué : %s.', $legacy_value );
+					}
+					if ( '' !== $legacy_value ) {
+						$seen_legacy[ $legacy_value ] = true;
+					}
 				foreach ( $issues as $issue ) {
 					$summary['errors'][] = array( 'file' => $type . '.csv', 'row' => $line, 'message' => $issue );
 					self::add_item( $job_id, $type, self::legacy_key( $type, $row ), 0, 'error', $line, array( 'message' => $issue ) );
