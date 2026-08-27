@@ -1,0 +1,2 @@
+legacy_reply_id,legacy_topic_id,legacy_author_id,content,created_at,updated_at,status,upvotes_count,legacy_parent_reply_id,sort_order
+r-invalid-1,t-invalid-1,u-invalid-1,Réponse synthétique invalide,date-invalide,,publish,-1,r-absent,1

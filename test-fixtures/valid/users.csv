@@ -1,0 +1,2 @@
+legacy_user_id,username,email,first_name,last_name,display_name,registered_at,bio,rank,role,status,password_hash
+u-valid-1,valid-user,valid-user@example.test,Valid,User,Valid User,2024-01-01T00:00:00+00:00,Compte synthétique de validation,Participant,subscriber,active,

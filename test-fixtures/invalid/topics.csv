@@ -1,0 +1,2 @@
+legacy_topic_id,legacy_forum_id,legacy_author_id,title,content,created_at,updated_at,status,slug,upvotes_count,replies_count,is_sticky,is_resolved
+t-invalid-1,f-invalid-1,u-absent,Sujet invalide,Contenu synthétique invalide,date-invalide,,publish,sujet-invalide,-1,0,0,0

@@ -2,9 +2,22 @@
 
 Ce changelog décrit les artefacts de référence livrés avec le dépôt public. Il ne contient ni accès, ni données de production, ni exports de base.
 
-## Atelier 0.4.31 et Premium Forum Core 0.4.16 — consolidation préproduction, 26 août 2026
+## Référence de pré-bêta — Atelier 0.4.32 et Premium Forum Core 0.4.18
 
-Les références finales deviennent le thème **Atelier 0.4.31**, livré dans `release/atelier-0.4.31-search-escape-complete.zip`, et **Premium Forum Core 0.4.16**, livré dans `release/premium-forum-core-0.4.16-security-headers-complete.zip`. Les versions PFC 0.4.12 à 0.4.15 sont des étapes intermédiaires de développement et ne sont pas publiées comme releases distinctes.
+La référence installable actuelle est le tag `atelier-prebeta-rc1`, accompagné de `ARTIFACTS-SHA256.txt`. Les seules archives de ce lot sont `release/atelier-0.4.32-a11y-visible-labels.zip` et `release/premium-forum-core-0.4.18-import-references.zip`.
+
+| Domaine | Évolution contenue |
+|---|---|
+| H01 — import | PFC 0.4.18 valide les relations utilisateur, forum, sujet et parent de réponse pendant le dry run, avant toute écriture. |
+| H05 — accessibilité | Atelier 0.4.32 aligne les noms accessibles de la marque, des votes et de la Collection avec les libellés visibles. |
+| H08 — bbPress | La publication PFC emploie les primitives bbPress pertinentes et resynchronise les compteurs ciblés. |
+| Référence | Manifeste SHA-256, matrice de tests, registre de risques, procédure d’installation/restauration et CI de vérification ajoutés. |
+
+> **Limite de la référence.** Elle est apte à une recette isolée et à la préparation d’une bêta fermée sous conditions. Elle n’autorise pas une mise en production publique.
+
+## Jalon historique — Atelier 0.4.31 et Premium Forum Core 0.4.16
+
+Cette consolidation antérieure est conservée dans l’historique Git, mais **ne constitue plus la procédure d’installation actuelle**. Les versions PFC 0.4.12 à 0.4.15 sont des étapes intermédiaires de développement et ne sont pas publiées comme releases distinctes.
 
 | Domaine | Évolution consolidée |
 |---|---|
@@ -16,9 +29,9 @@ Les références finales deviennent le thème **Atelier 0.4.31**, livré dans `r
 
 > **Limite de la release.** Deux sauvegardes locales ne remplacent ni une copie distante, ni une restauration isolée testée. La délivrabilité e-mail de production, le domaine final, les DNS d’authentification et les mesures terrain restent des prérequis avant ouverture publique.
 
-## Premium Forum Core 0.4.11 — stabilisation e-mail de recette, 26 août 2026
+## Jalon historique — Premium Forum Core 0.4.11
 
-La référence plugin devient **Premium Forum Core 0.4.11**, livrée dans `release/premium-forum-core-0.4.11-registration-stabilized.zip`. Le thème de référence reste Atelier 0.4.28.
+Ce jalon a stabilisé l’e-mail de recette. Il est historique; la référence d’installation actuelle est PFC 0.4.18 avec Atelier 0.4.32.
 
 | Domaine | Évolution livrée |
 |---|---|
@@ -30,9 +43,9 @@ La référence plugin devient **Premium Forum Core 0.4.11**, livrée dans `relea
 
 > **Limite de la release.** Mailtrap Sandbox confirme le comportement de staging, non la délivrabilité de production. Le domaine expéditeur, SPF, DKIM, DMARC et des essais vers de vraies boîtes restent nécessaires avant toute ouverture publique.
 
-## Atelier 0.4.28 et Premium Forum Core 0.4.4 — audit senior, 26 août 2026
+## Jalon historique — Atelier 0.4.28 et Premium Forum Core 0.4.4
 
-La release associe le thème WordPress **Atelier 0.4.28** — répertoire installable `atelier-0428/` — et **Premium Forum Core 0.4.4**. Les archives à privilégier sont `release/atelier-0.4.28-active-theme-senior-audit.zip` et `release/premium-forum-core-0.4.4-senior-audit.zip`.
+Ce jalon a introduit plusieurs parcours fonctionnels. Il est historique; les procédures actuelles doivent partir du tag de pré-bêta et du manifeste d’artefacts.
 
 | Domaine | Évolution livrée |
 |---|---|

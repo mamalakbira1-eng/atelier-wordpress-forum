@@ -1,0 +1,2 @@
+legacy_user_id,username,email,first_name,last_name,display_name,registered_at,bio,rank,role,status,password
+u-invalid-1,invalid-user,invalid-user@example.test,Invalid,User,Invalid User,2024-01-01T00:00:00+00:00,Compte synthétique invalide,Participant,subscriber,active,interdit

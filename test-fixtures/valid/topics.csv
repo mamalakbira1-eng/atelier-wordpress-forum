@@ -1,0 +1,2 @@
+legacy_topic_id,legacy_forum_id,legacy_author_id,title,content,created_at,updated_at,status,slug,upvotes_count,replies_count,is_sticky,is_resolved
+t-valid-1,f-valid-1,u-valid-1,Sujet de validation,Contenu synthétique de validation,2024-01-02T10:00:00+00:00,2024-01-02T10:00:00+00:00,publish,sujet-de-validation,0,1,0,0

@@ -3,6 +3,7 @@
 const ABSPATH = '/tmp/atelier-wp-stub/';
 function trailingslashit(string $v): string { return rtrim($v, '/\\') . '/'; }
 function sanitize_key($v): string { return strtolower(preg_replace('/[^a-z0-9_\-]/', '', (string) $v)); }
+function absint($v): int { return abs((int) $v); }
 function wp_unslash($v) { return $v; }
 function is_email($v): bool { return (bool) filter_var($v, FILTER_VALIDATE_EMAIL); }
 function wp_timezone(): DateTimeZone { return new DateTimeZone('UTC'); }
@@ -37,6 +38,7 @@ $result = [
     'invalid_pack_is_rejected' => !empty($invalid['errors']),
     'invalid_pack_detects_plain_password' => (bool) array_filter($invalid['errors'], fn($e) => str_contains($e['message'], 'mots de passe en clair')),
     'invalid_pack_detects_bad_date_or_votes' => (bool) array_filter($invalid['errors'], fn($e) => str_contains($e['message'], 'date ISO') || str_contains($e['message'], 'upvotes_count')),
+    'invalid_pack_detects_missing_relationship' => (bool) array_filter($invalid['errors'], fn($e) => str_contains($e['message'], 'Référence legacy_')),
   ],
 ];
 $result['pass'] = !in_array(false, $result['assertions'], true);

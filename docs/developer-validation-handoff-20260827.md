@@ -1,6 +1,6 @@
 # Atelier — dossier de validation pour le prochain développeur
 
-**Révision publique de référence :** [`324b1d1`](https://github.com/mamalakbira1-eng/atelier-wordpress-forum/commit/324b1d1)
+**Révision publique de référence :** [`atelier-prebeta-rc1`](https://github.com/mamalakbira1-eng/atelier-wordpress-forum/tree/atelier-prebeta-rc1)
 **Dépôt :** [mamalakbira1-eng/atelier-wordpress-forum](https://github.com/mamalakbira1-eng/atelier-wordpress-forum)
 
 Ce document est le point de départ de la reprise technique. Il rassemble exclusivement des liens vers le code, les releases, les fixtures et les comptes rendus **publics et assainis**. Il ne donne pas accès à un environnement, à un compte, à une sauvegarde, à une adresse personnelle, à un secret ni à des données de session.
@@ -11,10 +11,10 @@ Ce document est le point de départ de la reprise technique. Il rassemble exclus
 
 | Ordre | Élément à lire | Objectif de validation |
 |---:|---|---|
-| 1 | [README](https://github.com/mamalakbira1-eng/atelier-wordpress-forum/blob/main/README.md) et [CHANGELOG](https://github.com/mamalakbira1-eng/atelier-wordpress-forum/blob/main/CHANGELOG.md) | Comprendre le périmètre, les versions et la structure du dépôt. |
-| 2 | [Synthèse publique de recette](https://github.com/mamalakbira1-eng/atelier-wordpress-forum/blob/main/docs/public-senior-recipe-summary-20260827.md) | Revoir le périmètre testé, les résultats, les défauts corrigés et les préconditions de lancement. |
-| 3 | [Rapport de clôture senior](https://github.com/mamalakbira1-eng/atelier-wordpress-forum/blob/main/docs/senior-closure-report-20260826.md) et [constats d’audit](https://github.com/mamalakbira1-eng/atelier-wordpress-forum/blob/main/docs/senior-audit-findings-20260826.md) | Vérifier les décisions, les limites et les risques laissés volontairement ouverts. |
-| 4 | [Pack des 20 audits et simulations](https://github.com/mamalakbira1-eng/atelier-wordpress-forum/blob/main/docs/prompts-claude-fable-senior-20260826.md) | Rejouer ou compléter la recette sans inventer de nouveaux scénarios non justifiés. |
+| 1 | [README](https://github.com/mamalakbira1-eng/atelier-wordpress-forum/blob/atelier-prebeta-rc1/README.md), [CHANGELOG](https://github.com/mamalakbira1-eng/atelier-wordpress-forum/blob/atelier-prebeta-rc1/CHANGELOG.md) et [référence canonique](https://github.com/mamalakbira1-eng/atelier-wordpress-forum/blob/atelier-prebeta-rc1/docs/canonical-reference-20260827.md) | Comprendre le lot gelé, les versions et la structure du dépôt. |
+| 2 | [Manifeste SHA-256](https://github.com/mamalakbira1-eng/atelier-wordpress-forum/blob/atelier-prebeta-rc1/ARTIFACTS-SHA256.txt), [procès-verbal de validation reproductible](https://github.com/mamalakbira1-eng/atelier-wordpress-forum/blob/atelier-prebeta-rc1/docs/reproducibility-validation-20260827.md) et [procédure d’installation/restauration](https://github.com/mamalakbira1-eng/atelier-wordpress-forum/blob/atelier-prebeta-rc1/docs/clean-install-and-recovery-procedure-20260827.md) | Vérifier les artefacts et préparer une instance isolée. |
+| 3 | [Synthèse publique de recette](https://github.com/mamalakbira1-eng/atelier-wordpress-forum/blob/atelier-prebeta-rc1/docs/public-senior-recipe-summary-20260827.md), [matrice de tests](https://github.com/mamalakbira1-eng/atelier-wordpress-forum/blob/atelier-prebeta-rc1/docs/test-matrix-20260827.md) et [registre des risques](https://github.com/mamalakbira1-eng/atelier-wordpress-forum/blob/atelier-prebeta-rc1/docs/risk-register-20260827.md) | Revoir les preuves, les tests à rejouer et les écarts ouverts. |
+| 4 | [Rapport de clôture senior](https://github.com/mamalakbira1-eng/atelier-wordpress-forum/blob/atelier-prebeta-rc1/docs/senior-closure-report-20260826.md), [constats d’audit](https://github.com/mamalakbira1-eng/atelier-wordpress-forum/blob/atelier-prebeta-rc1/docs/senior-audit-findings-20260826.md) et [pack des 20 audits et simulations](https://github.com/mamalakbira1-eng/atelier-wordpress-forum/blob/atelier-prebeta-rc1/docs/prompts-claude-fable-senior-20260826.md) | Rejouer ou compléter la recette sans inventer de scénarios non justifiés. |
 
 ## Code à contrôler
 
@@ -22,27 +22,27 @@ Le thème reste responsable du rendu, de l’accessibilité visuelle, de la navi
 
 | Zone | Lien direct | Contrôle attendu |
 |---|---|---|
-| Thème Atelier — racine | [`atelier/`](https://github.com/mamalakbira1-eng/atelier-wordpress-forum/tree/main/atelier) | Vérifier structure WordPress, hooks et version déclarée. |
-| Bootstrap du thème | [`atelier/functions.php`](https://github.com/mamalakbira1-eng/atelier-wordpress-forum/blob/main/atelier/functions.php) | Vérifier assets, cache, RTL, recherche et intégration PFC. |
-| En-tête et marque | [`atelier/header.php`](https://github.com/mamalakbira1-eng/atelier-wordpress-forum/blob/main/atelier/header.php) | Confirmer le nom accessible de la marque, corrigé par H05. |
-| Gabarit de réponse | [`atelier/bbpress/loop-single-reply.php`](https://github.com/mamalakbira1-eng/atelier-wordpress-forum/blob/main/atelier/bbpress/loop-single-reply.php) | Confirmer le libellé visible/inclusif des votes de réponses (H05). |
-| Gabarit du sujet | [`atelier/bbpress/content-single-topic.php`](https://github.com/mamalakbira1-eng/atelier-wordpress-forum/blob/main/atelier/bbpress/content-single-topic.php) | Confirmer la carte Collection et les structures de lecture machine (H05). |
-| Interactions client | [`atelier/assets/js/atelier-interactions.js`](https://github.com/mamalakbira1-eng/atelier-wordpress-forum/blob/main/atelier/assets/js/atelier-interactions.js) | Vérifier cohérence des libellés après interaction et navigation clavier. |
-| PFC — racine | [`premium-forum-core/`](https://github.com/mamalakbira1-eng/atelier-wordpress-forum/tree/main/premium-forum-core) | Vérifier dépendance bbPress, version et protections de surface HTTP. |
-| Bootstrap PFC | [`premium-forum-core.php`](https://github.com/mamalakbira1-eng/atelier-wordpress-forum/blob/main/premium-forum-core/premium-forum-core.php) | Confirmer la version 0.4.18 et le chargement des modules. |
-| Import CSV | [`class-pfc-importer.php`](https://github.com/mamalakbira1-eng/atelier-wordpress-forum/blob/main/premium-forum-core/includes/class-pfc-importer.php) | Vérifier la validation des relations avant écriture (H01). |
-| Modération PFC | [`class-pfc-moderation.php`](https://github.com/mamalakbira1-eng/atelier-wordpress-forum/blob/main/premium-forum-core/includes/class-pfc-moderation.php) | Vérifier `bbp_approve_reply()` et la resynchronisation ciblée des compteurs (H08). |
+| Thème Atelier — racine | [`atelier/`](https://github.com/mamalakbira1-eng/atelier-wordpress-forum/tree/atelier-prebeta-rc1/atelier) | Vérifier structure WordPress, hooks et version déclarée. |
+| Bootstrap du thème | [`atelier/functions.php`](https://github.com/mamalakbira1-eng/atelier-wordpress-forum/blob/atelier-prebeta-rc1/atelier/functions.php) | Vérifier assets, cache, RTL, recherche et intégration PFC. |
+| En-tête et marque | [`atelier/header.php`](https://github.com/mamalakbira1-eng/atelier-wordpress-forum/blob/atelier-prebeta-rc1/atelier/header.php) | Confirmer le nom accessible de la marque, corrigé par H05. |
+| Gabarit de réponse | [`atelier/bbpress/loop-single-reply.php`](https://github.com/mamalakbira1-eng/atelier-wordpress-forum/blob/atelier-prebeta-rc1/atelier/bbpress/loop-single-reply.php) | Confirmer le libellé visible/inclusif des votes de réponses (H05). |
+| Gabarit du sujet | [`atelier/bbpress/content-single-topic.php`](https://github.com/mamalakbira1-eng/atelier-wordpress-forum/blob/atelier-prebeta-rc1/atelier/bbpress/content-single-topic.php) | Confirmer la carte Collection et les structures de lecture machine (H05). |
+| Interactions client | [`atelier/assets/js/atelier-interactions.js`](https://github.com/mamalakbira1-eng/atelier-wordpress-forum/blob/atelier-prebeta-rc1/atelier/assets/js/atelier-interactions.js) | Vérifier cohérence des libellés après interaction et navigation clavier. |
+| PFC — racine | [`premium-forum-core/`](https://github.com/mamalakbira1-eng/atelier-wordpress-forum/tree/atelier-prebeta-rc1/premium-forum-core) | Vérifier dépendance bbPress, version et protections de surface HTTP. |
+| Bootstrap PFC | [`premium-forum-core.php`](https://github.com/mamalakbira1-eng/atelier-wordpress-forum/blob/atelier-prebeta-rc1/premium-forum-core/premium-forum-core.php) | Confirmer la version 0.4.18 et le chargement des modules. |
+| Import CSV | [`class-pfc-importer.php`](https://github.com/mamalakbira1-eng/atelier-wordpress-forum/blob/atelier-prebeta-rc1/premium-forum-core/includes/class-pfc-importer.php) | Vérifier la validation des relations avant écriture (H01). |
+| Modération PFC | [`class-pfc-moderation.php`](https://github.com/mamalakbira1-eng/atelier-wordpress-forum/blob/atelier-prebeta-rc1/premium-forum-core/includes/class-pfc-moderation.php) | Vérifier `bbp_approve_reply()` et la resynchronisation ciblée des compteurs (H08). |
 
 ## Artefacts de déploiement et de test
 
 | Catégorie | Lien direct | Utilisation de validation |
 |---|---|---|
-| Release Atelier 0.4.32 | [`atelier-0.4.32-a11y-visible-labels.zip`](https://github.com/mamalakbira1-eng/atelier-wordpress-forum/blob/main/release/atelier-0.4.32-a11y-visible-labels.zip) | Vérifier l’intégrité du paquet correspondant à H05. |
-| Release PFC 0.4.18 | [`premium-forum-core-0.4.18-import-references.zip`](https://github.com/mamalakbira1-eng/atelier-wordpress-forum/blob/main/release/premium-forum-core-0.4.18-import-references.zip) | Vérifier l’intégrité du paquet correspondant à H01 et incluant H08. |
-| Jeux de fixtures | [`fixtures/`](https://github.com/mamalakbira1-eng/atelier-wordpress-forum/tree/main/fixtures) | Revoir le format d’import synthétique sans mots de passe. |
-| Utilisateurs synthétiques | [`fixtures/users.csv`](https://github.com/mamalakbira1-eng/atelier-wordpress-forum/blob/main/fixtures/users.csv) | Confirmer l’absence de `password_hash` et l’usage d’adresses de test. |
-| Forums, sujets et réponses | [`forums.csv`](https://github.com/mamalakbira1-eng/atelier-wordpress-forum/blob/main/fixtures/forums.csv), [`topics.csv`](https://github.com/mamalakbira1-eng/atelier-wordpress-forum/blob/main/fixtures/topics.csv), [`replies.csv`](https://github.com/mamalakbira1-eng/atelier-wordpress-forum/blob/main/fixtures/replies.csv) | Contrôler les mappings et les cas de test. |
-| Manifeste de validation | [`validation-manifest.json`](https://github.com/mamalakbira1-eng/atelier-wordpress-forum/blob/main/fixtures/validation-manifest.json) | Vérifier les assertions attendues du pack de test. |
+| Release Atelier 0.4.32 | [`atelier-0.4.32-a11y-visible-labels.zip`](https://github.com/mamalakbira1-eng/atelier-wordpress-forum/blob/atelier-prebeta-rc1/release/atelier-0.4.32-a11y-visible-labels.zip) | Vérifier l’intégrité du paquet correspondant à H05. |
+| Release PFC 0.4.18 | [`premium-forum-core-0.4.18-import-references.zip`](https://github.com/mamalakbira1-eng/atelier-wordpress-forum/blob/atelier-prebeta-rc1/release/premium-forum-core-0.4.18-import-references.zip) | Vérifier l’intégrité du paquet correspondant à H01 et incluant H08. |
+| Manifeste | [`ARTIFACTS-SHA256.txt`](https://github.com/mamalakbira1-eng/atelier-wordpress-forum/blob/atelier-prebeta-rc1/ARTIFACTS-SHA256.txt) | Vérifier les hashes avant installation. |
+| Fixtures de CI | [`test-fixtures/`](https://github.com/mamalakbira1-eng/atelier-wordpress-forum/tree/atelier-prebeta-rc1/test-fixtures) | Exécuter les packs minimalistes valide et invalide, incluant H01. |
+| Jeux de fixtures d’import | [`fixtures/`](https://github.com/mamalakbira1-eng/atelier-wordpress-forum/tree/atelier-prebeta-rc1/fixtures) | Revoir le format d’import synthétique sans mots de passe. |
+| Manifeste de validation | [`validation-manifest.json`](https://github.com/mamalakbira1-eng/atelier-wordpress-forum/blob/atelier-prebeta-rc1/fixtures/validation-manifest.json) | Vérifier les assertions attendues du pack de test. |
 
 ## Protocole de validation minimal
 
@@ -63,7 +63,7 @@ Les contrôles fonctionnels à rejouer sont : membre vers contribution pending, 
 
 ## Références
 
-[1] [Commit public de relais 324b1d1](https://github.com/mamalakbira1-eng/atelier-wordpress-forum/commit/324b1d1)
+[1] [Tag canonique de pré-bêta](https://github.com/mamalakbira1-eng/atelier-wordpress-forum/tree/atelier-prebeta-rc1)
 
-[2] [Synthèse publique de recette senior](https://github.com/mamalakbira1-eng/atelier-wordpress-forum/blob/main/docs/public-senior-recipe-summary-20260827.md)
+[2] [Synthèse publique de recette senior](https://github.com/mamalakbira1-eng/atelier-wordpress-forum/blob/atelier-prebeta-rc1/docs/public-senior-recipe-summary-20260827.md)
 [3] [Dépôt Atelier WordPress Forum](https://github.com/mamalakbira1-eng/atelier-wordpress-forum)
