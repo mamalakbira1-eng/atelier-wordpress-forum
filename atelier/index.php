@@ -26,7 +26,7 @@ $atelier_compose_url = atelier_compose_url();
 			<p class="atelier-kicker"><span aria-hidden="true"></span>Mémoire collective · 2024</p>
 			<h1>Les bonnes conversations ne doivent pas disparaître.</h1>
 			<p>Atelier transforme les discussions exigeantes en ressources vivantes, sourcées et partageables.</p>
-			<div class="atelier-home__actions"><a class="atelier-home__primary-action" href="<?php echo esc_url( $atelier_spaces_url ); ?>">Explorer les espaces <span aria-hidden="true">→</span></a><a class="atelier-home__text-action" href="#sources-recentes">Lire les dernières sources <span aria-hidden="true">→</span></a></div>
+			<div class="atelier-home__actions"><a class="atelier-home__primary-action" href="<?php echo esc_url( $atelier_spaces_url ); ?>">Explorer les espaces <span class="atelier-glyph atelier-glyph--arrow" aria-hidden="true"></span></a><a class="atelier-home__text-action" href="#sources-recentes">Lire les dernières sources <span class="atelier-glyph atelier-glyph--arrow" aria-hidden="true"></span></a></div>
 		</div>
 		<figure class="atelier-home__hero-art"><img src="<?php echo esc_url( $atelier_asset_base . 'atelier-hero.webp' ); ?>" alt="Composition éditoriale abstraite de papier ivoire, d’ombres bleutées et d’un ruban vermillon." fetchpriority="high" /></figure>
 		<dl class="atelier-home__metrics" aria-label="Repères de la communauté"><div><dt>Espaces</dt><dd><?php echo esc_html( number_format_i18n( $atelier_stats['forums'] ) ); ?></dd></div><div><dt>Sources</dt><dd><?php echo esc_html( number_format_i18n( $atelier_stats['topics'] ) ); ?></dd></div><div><dt>Contributeurs</dt><dd><?php echo esc_html( number_format_i18n( $atelier_stats['contributors'] ) ); ?></dd></div></dl>

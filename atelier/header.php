@@ -14,7 +14,7 @@ $atelier_member_url = function_exists( 'atelier_member_url' ) ? atelier_member_u
 	<form id="atelier-header-search-form" class="atelier-header__search" role="search" method="get" action="<?php echo esc_url( home_url( '/' ) ); ?>" data-atelier-search>
 		<label class="screen-reader-text" for="atelier-header-search">Rechercher dans le forum</label>
         <input id="atelier-header-search" type="search" name="s" value="<?php echo esc_attr( get_search_query() ); ?>" placeholder="Rechercher dans le forum" autocomplete="off" />
-		<button type="submit" aria-label="Lancer la recherche"><span aria-hidden="true">⌕</span><span class="atelier-header__search-label">Rechercher</span><kbd>/</kbd></button>
+		<button type="submit" aria-label="Lancer la recherche"><span class="atelier-glyph atelier-glyph--search" aria-hidden="true"></span><span class="atelier-header__search-label">Rechercher</span><kbd>/</kbd></button>
 	</form>
 		<div class="atelier-search-suggestions" id="atelier-search-suggestions" role="status" aria-live="polite" hidden></div>
 	</div>

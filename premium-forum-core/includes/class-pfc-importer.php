@@ -189,6 +189,7 @@ final class PFC_Importer {
 			$name  = $entry['name'] ?? '';
 			$base  = strtolower( basename( $name ) );
 			if ( $name !== $base || ! isset( $allowed[ $base ] ) ) {
+				self::add_item( $job_id, 'file', $name ?: 'entrée-inconnue', 0, 'error', 0, array( 'message' => 'Le ZIP contient un fichier ou chemin non autorisé.' ) );
 				continue;
 			}
 			if ( (int) ( $entry['size'] ?? 0 ) > 5 * MB_IN_BYTES ) {
@@ -336,30 +337,48 @@ final class PFC_Importer {
 	private static function validate_job( int $job_id, string $dir ): array {
 		$summary = array( 'files' => 0, 'rows' => 0, 'errors' => array(), 'warnings' => array(), 'counts' => array() );
 		$pack    = self::read_pack( $dir, true );
+		$allowed_files = array( 'users.csv', 'forums.csv', 'topics.csv', 'replies.csv' );
+		foreach ( glob( trailingslashit( $dir ) . '*' ) ?: array() as $entry ) {
+			$name = basename( $entry );
+			if ( ! in_array( strtolower( $name ), $allowed_files, true ) ) {
+				$summary['errors'][] = array( 'file' => $name, 'row' => 0, 'message' => 'Fichier inattendu dans le pack.' );
+				self::add_item( $job_id, 'file', $name, 0, 'error', 0, array( 'message' => 'Fichier inattendu dans le pack.' ) );
+			}
+		}
+		$seen_user_fields = array( 'email' => array(), 'username' => array() );
 		foreach ( self::schemas() as $type => $schema ) {
 			$file = trailingslashit( $dir ) . $type . '.csv';
 			if ( ! file_exists( $file ) ) {
 				$summary['errors'][] = array( 'file' => $type . '.csv', 'row' => 0, 'message' => 'Fichier requis absent.' );
 				continue;
 			}
-				$summary['files']++;
-				if ( empty( $pack[ $type ] ) ) {
-					$summary['errors'][] = array( 'file' => $type . '.csv', 'row' => 0, 'message' => 'Fichier requis vide.' );
-					self::add_item( $job_id, $type, '', 0, 'error', 0, array( 'message' => 'Fichier requis vide.' ) );
-					continue;
+			$summary['files']++;
+			if ( empty( $pack[ $type ] ) ) {
+				$summary['errors'][] = array( 'file' => $type . '.csv', 'row' => 0, 'message' => 'Fichier requis vide.' );
+				self::add_item( $job_id, $type, '', 0, 'error', 0, array( 'message' => 'Fichier requis vide.' ) );
+				continue;
+			}
+			$legacy_field = self::schemas()[ $type ]['required'][0];
+			$seen_legacy = array();
+			foreach ( $pack[ $type ] as $line => $row ) {
+				$summary['rows']++;
+				$legacy_value = trim( (string) ( $row[ $legacy_field ] ?? '' ) );
+				$issues = self::validate_row( $type, $row, $schema['required'] );
+				if ( '' !== $legacy_value && isset( $seen_legacy[ $legacy_value ] ) ) {
+					$issues[] = sprintf( 'Identifiant legacy dupliqué : %s.', $legacy_value );
 				}
-				$legacy_field = self::schemas()[ $type ]['required'][0];
-				$seen_legacy = array();
-				foreach ( $pack[ $type ] as $line => $row ) {
-					$summary['rows']++;
-					$legacy_value = trim( (string) ( $row[ $legacy_field ] ?? '' ) );
-					$issues = self::validate_row( $type, $row, $schema['required'] );
-					if ( '' !== $legacy_value && isset( $seen_legacy[ $legacy_value ] ) ) {
-						$issues[] = sprintf( 'Identifiant legacy dupliqué : %s.', $legacy_value );
+				if ( '' !== $legacy_value ) {
+					$seen_legacy[ $legacy_value ] = true;
+				}
+				if ( 'users' === $type ) {
+					foreach ( array( 'email', 'username' ) as $field ) {
+						$value = strtolower( trim( (string) ( $row[ $field ] ?? '' ) ) );
+						if ( '' !== $value && isset( $seen_user_fields[ $field ][ $value ] ) ) {
+							$issues[] = sprintf( 'Doublon %s dans le pack : %s.', $field, $value );
+						}
+						if ( '' !== $value ) { $seen_user_fields[ $field ][ $value ] = true; }
 					}
-					if ( '' !== $legacy_value ) {
-						$seen_legacy[ $legacy_value ] = true;
-					}
+				}
 				foreach ( $issues as $issue ) {
 					$summary['errors'][] = array( 'file' => $type . '.csv', 'row' => $line, 'message' => $issue );
 					self::add_item( $job_id, $type, self::legacy_key( $type, $row ), 0, 'error', $line, array( 'message' => $issue ) );
