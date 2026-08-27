@@ -264,3 +264,8 @@ body .atelier-header__search-wrap{position:relative;flex:none}body .atelier-head
 /* Accessibility: bbPress quicktag controls must remain readable in the Atelier palette. */
 .ed_button.button.button-small{background:#fff;border:1px solid #17324d;color:#17324d;font-weight:700}
 .ed_button.button.button-small:hover,.ed_button.button.button-small:focus{background:#17324d;border-color:#17324d;color:#fff}
+/* Accessibility: give decorative arrow/search glyphs an explicit contrast surface for older analyzers. */
+.atelier-header__search button>span[aria-hidden="true"]{background:#fffdfa;color:#172332}
+.atelier-home__primary-action>span[aria-hidden="true"]{background:#172332;color:#fffdfa}
+.atelier-home__text-action>span[aria-hidden="true"]{background:var(--atelier-paper);color:var(--atelier-ink)}
+.atelier-thread__hero a>span[aria-hidden="true"]{background:#f4eee5;color:var(--atelier-ink)}
