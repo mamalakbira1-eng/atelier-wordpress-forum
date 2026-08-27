@@ -43,6 +43,7 @@ add_action( 'pre_get_posts', static function( WP_Query $query ): void { if ( is_
 function atelier_contains_arabic( string $text ): bool { return (bool) preg_match( '/[\x{0600}-\x{06FF}\x{0750}-\x{077F}\x{08A0}-\x{08FF}]/u', wp_strip_all_tags( $text ) ); }
 function atelier_content_dir( string $text ): string { return atelier_contains_arabic( $text ) ? 'rtl' : 'ltr'; }
 add_filter( 'body_class', static function( array $classes ): array { if ( is_singular() ) { $post = get_queried_object(); if ( $post instanceof WP_Post && atelier_contains_arabic( (string) $post->post_title . ' ' . (string) $post->post_content ) ) $classes[] = 'atelier-has-arabic'; } return $classes; } );
+add_filter( 'language_attributes', static function( string $output ): string { if ( is_singular() ) { $post = get_queried_object(); if ( $post instanceof WP_Post && atelier_contains_arabic( (string) $post->post_title . ' ' . (string) $post->post_content ) ) return 'lang="ar" dir="rtl"'; } return $output; } );
 /** Atelier — connexion cohérente avec le site public, y compris lorsque WordPress affiche directement wp-login.php. */
 
 add_action( 'login_enqueue_scripts', static function(): void { $login_file = get_stylesheet_directory() . '/login.css'; $login_version = file_exists( $login_file ) ? (string) filemtime( $login_file ) : wp_get_theme()->get( 'Version' ); wp_enqueue_style( 'atelier-login', get_stylesheet_directory_uri() . '/login.css', array(), $login_version ); } );
