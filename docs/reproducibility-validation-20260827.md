@@ -1,6 +1,6 @@
 # Atelier — procès-verbal de validation reproductible
 
-**Référence visée :** `atelier-prebeta-rc2`.
+**Référence visée :** `atelier-prebeta-rc3`.
 **Périmètre :** vérifications statiques et d’intégrité effectuées sur le miroir assaini du dépôt public. Aucune installation WordPress, restauration, mutation de préproduction, envoi réel ni consultation de sauvegarde n’a été exécuté pour cette validation.
 
 ## Contrôles réalisés
@@ -15,7 +15,7 @@
 | Harnais CSV | `php tools/test-pfc-validation.php test-fixtures/valid test-fixtures/invalid` | `pass=true`; le pack invalide déclenche notamment la détection de relation absente, de mot de passe en clair et de données de date/vote invalides sans fatal. |
 | Marqueurs privés connus | Recherche ciblée des littéraux interdits dans le miroir public | Aucun marqueur privé connu trouvé. |
 
-La première candidate `atelier-prebeta-rc1` a échoué en CI parce qu’une date invalide sous PHP moderne levait une exception non couverte par le validateur. PFC 0.4.19 corrige ce point H09 en interceptant `Throwable`; `atelier-prebeta-rc2` remplace rc1 sans réécrire son historique. Ces contrôles sont aussi définis dans la [CI d’intégrité](../.github/workflows/artifact-integrity.yml). Celle-ci doit être observée verte sur le commit et le tag rc2 réels avant toute décision de bêta.
+La première candidate `atelier-prebeta-rc1` a échoué en CI parce qu’une date invalide sous PHP moderne levait une exception non couverte par le validateur. PFC 0.4.19 corrige ce point H09 en interceptant `Throwable`. La candidate `atelier-prebeta-rc2` a ensuite échoué parce que son workflow référençait encore l’archive PFC 0.4.18 retirée du lot; aucun comportement de forum n’est impliqué. `atelier-prebeta-rc3` remplace les deux candidates sans réécrire leur historique. Ces contrôles sont aussi définis dans la [CI d’intégrité](../.github/workflows/artifact-integrity.yml). Celle-ci doit être observée verte sur le commit et le tag rc3 réels avant toute décision de bêta.
 
 ## Limite explicitement conservée
 

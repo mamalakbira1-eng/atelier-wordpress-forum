@@ -1,6 +1,6 @@
 # Atelier — manifeste SHA-256 des artefacts installables
-# Référence canonique : tag annoté atelier-prebeta-rc2
-# Commit de code : résolu de manière immuable par `git rev-parse atelier-prebeta-rc2^{commit}`
+# Référence canonique : tag annoté atelier-prebeta-rc3
+# Commit de code : résolu de manière immuable par `git rev-parse atelier-prebeta-rc3^{commit}`
 # Date de génération du manifeste : 2026-08-27
 # Vérification : sha256sum --check ARTIFACTS-SHA256.txt
 # Les chemins sont relatifs à la racine du dépôt.

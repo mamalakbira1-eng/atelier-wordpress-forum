@@ -17,7 +17,7 @@ Le dépôt public présentait des documents de reprise faisant encore référenc
 
 ## Décision
 
-La référence d’installation est désormais **Atelier 0.4.32 + PFC 0.4.19**, gelée par le tag `atelier-prebeta-rc2`, le manifeste SHA-256 et la matrice de tests. Le tag `atelier-prebeta-rc1` est conservé comme trace d’une candidate dont la CI a échoué; il ne doit pas être installé. Le README et le CHANGELOG ne présentent plus 0.4.31/0.4.16 comme versions d’installation courante. Les mentions historiques sont conservées comme jalons documentaires, non comme instructions opérationnelles.
+La référence d’installation est désormais **Atelier 0.4.32 + PFC 0.4.19**, gelée par le tag `atelier-prebeta-rc3`, le manifeste SHA-256 et la matrice de tests. Le tag `atelier-prebeta-rc1` est conservé comme trace d’une candidate dont la CI a révélé H09; `atelier-prebeta-rc2` comme trace d’une candidate dont le workflow référençait une archive retirée. Aucun des deux tags ne doit être installé. Le README et le CHANGELOG ne présentent plus 0.4.31/0.4.16 comme versions d’installation courante. Les mentions historiques sont conservées comme jalons documentaires, non comme instructions opérationnelles.
 
 ## Écarts conservés volontairement
 

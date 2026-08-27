@@ -1,6 +1,6 @@
 # Atelier — matrice de tests de la référence de pré-bêta
 
-**Référence ciblée :** `atelier-prebeta-rc2`.
+**Référence ciblée :** `atelier-prebeta-rc3`.
 **Règle :** utiliser uniquement une instance autorisée et des données synthétiques. Les scénarios de sécurité, d’import ou de compteur sont à rejouer après toute modification de PFC, d’Atelier, de bbPress ou de la configuration de cache.
 
 | ID | Domaine | Précondition | Action et preuve attendue | État de recette connu | Rejeu requis sur installation propre |
@@ -15,7 +15,7 @@
 | T08 | Interactions | Deux membres synthétiques distincts. | Vote, anti-auto-vote, suivi, bascule, notification interne et réponse à une réponse. | Validé. | Oui. |
 | T09 | Import valide | Pack synthétique valide. | Dry run, import contrôlé, journal et rollback ciblé. | Validé. | Oui. |
 | T10 | H01 relations | Pack synthétique comportant une relation absente. | Dry run `needs_fix`, aucune création avant écriture. | Validé; inclus dans PFC 0.4.19. | Oui. |
-| T11 | H09 validation date | Pack synthétique avec date et compteur invalides. | Dry run et harnais retournent des erreurs structurées sans fatal sous PHP cible. | Validé localement et exigé en CI sur rc2. | Oui. |
+| T11 | H09 validation date | Pack synthétique avec date et compteur invalides. | Dry run et harnais retournent des erreurs structurées sans fatal sous PHP cible. | Validé localement et exigé en CI sur rc3. | Oui. |
 | T12 | Cache | Visiteur anonyme et écran de connexion. | Cache public de lecture; directives privées et `no-store` à la connexion. | Validé. | Oui. |
 | T13 | Recherche/RTL | Sujet arabe synthétique publié. | Suggestion, flèche bas, Entrée, contenu RTL, alignement et police attendus. | Validé sur bureau. | Oui, avec mobile. |
 | T14 | Accessibilité | Mobile et bureau, clavier, zoom, lecteur d’écran. | Focus visible, erreurs de formulaire compréhensibles, noms accessibles et libellés cohérents. | Lighthouse H05 validé; recette humaine incomplète. | Oui, obligatoire. |

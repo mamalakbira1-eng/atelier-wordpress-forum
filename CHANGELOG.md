@@ -4,7 +4,7 @@ Ce changelog décrit les artefacts de référence livrés avec le dépôt public
 
 ## Référence de pré-bêta — Atelier 0.4.32 et Premium Forum Core 0.4.19
 
-La référence installable actuelle est le tag `atelier-prebeta-rc2`, accompagné de `ARTIFACTS-SHA256.txt`. Les seules archives de ce lot sont `release/atelier-0.4.32-a11y-visible-labels.zip` et `release/premium-forum-core-0.4.19-csv-validation-compat.zip`.
+La référence installable actuelle est le tag `atelier-prebeta-rc3`, accompagné de `ARTIFACTS-SHA256.txt`. Les seules archives de ce lot sont `release/atelier-0.4.32-a11y-visible-labels.zip` et `release/premium-forum-core-0.4.19-csv-validation-compat.zip`.
 
 | Domaine | Évolution contenue |
 |---|---|
@@ -16,9 +16,9 @@ La référence installable actuelle est le tag `atelier-prebeta-rc2`, accompagn�
 
 > **Limite de la référence.** Elle est apte à une recette isolée et à la préparation d’une bêta fermée sous conditions. Elle n’autorise pas une mise en production publique.
 
-## Jalon historique — atelier-prebeta-rc1
+## Jalons historiques — atelier-prebeta-rc1 et atelier-prebeta-rc2
 
-Le tag `atelier-prebeta-rc1` est conservé comme trace immuable de la première tentative de gel. Sa CI a révélé un défaut de portabilité du validateur CSV sous PHP moderne lorsque le pack contient une date invalide. Il **ne doit pas être utilisé pour une installation de référence**. Le tag `atelier-prebeta-rc2` remplace cette candidate sans réécrire l’historique.
+Le tag `atelier-prebeta-rc1` est conservé comme trace immuable de la première tentative de gel. Sa CI a révélé un défaut de portabilité du validateur CSV sous PHP moderne lorsque le pack contient une date invalide. La candidate `atelier-prebeta-rc2` corrigeait H09 mais son workflow d’intégrité référençait encore une archive retirée, ce qui a fait échouer la CI. Aucun de ces tags ne doit être utilisé pour une installation de référence. Le tag `atelier-prebeta-rc3` remplace ces candidates sans réécrire l’historique.
 
 ## Jalon historique — Atelier 0.4.31 et Premium Forum Core 0.4.16
 

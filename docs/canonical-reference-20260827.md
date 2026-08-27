@@ -2,7 +2,7 @@
 
 **Statut :** référence candidate de pré-bêta, non autorisée en production.
 
-**Référence immuable :** `refs/tags/atelier-prebeta-rc2` une fois le tag publié.
+**Référence immuable :** `refs/tags/atelier-prebeta-rc3` une fois le tag publié.
 **Règle de gel :** le tag, les sources, les archives ZIP, le manifeste SHA-256, la matrice de tests et la documentation de cette page constituent un même lot. Toute modification impose un nouveau commit, de nouveaux hash et un nouveau tag; aucune archive ne peut être remplacée silencieusement.
 
 ## Périmètre logiciel associé
@@ -27,7 +27,7 @@ Les versions WordPress, bbPress et PHP ci-dessus sont des **références de rece
 La commande ci-dessous est la vérification minimale des artefacts :
 
 ```bash
-git checkout atelier-prebeta-rc2
+git checkout atelier-prebeta-rc3
 sha256sum --check ARTIFACTS-SHA256.txt
 unzip -t release/atelier-0.4.32-a11y-visible-labels.zip
 unzip -t release/premium-forum-core-0.4.19-csv-validation-compat.zip
