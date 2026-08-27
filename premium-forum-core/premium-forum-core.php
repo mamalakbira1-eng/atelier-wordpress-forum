@@ -30,6 +30,12 @@ require_once PFC_DIR . 'includes/class-pfc-moderation.php';
 add_filter( 'xmlrpc_enabled', '__return_false' );
 add_filter( 'wp_is_application_passwords_available', '__return_false' );
 add_filter( 'wp_is_application_passwords_available_for_user', '__return_false' );
+add_filter( 'rest_endpoints', static function( array $endpoints ): array {
+	if ( ! current_user_can( 'list_users' ) ) {
+		unset( $endpoints['/wp/v2/users'], $endpoints['/wp/v2/users/(?P<id>[\\d]+)'] );
+	}
+	return $endpoints;
+} );
 add_action( 'init', static function() {
 	if ( defined( 'XMLRPC_REQUEST' ) && XMLRPC_REQUEST ) {
 		status_header( 403 );
