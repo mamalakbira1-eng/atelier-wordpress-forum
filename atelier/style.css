@@ -72,6 +72,7 @@ body .atelier-header__search-wrap{position:relative;flex:none}body .atelier-head
 
 /* Atelier — override final de parité : ces règles restent en dernier pour battre les styles historiques. */
 .atelier-thread__actions{display:flex!important;align-items:center!important;flex-wrap:wrap!important;gap:7px!important;margin-top:17px!important}
+@media(max-width:700px){.atelier-thread{overflow-x:clip}.atelier-thread__source-line{min-width:0;flex-wrap:wrap;overflow-wrap:anywhere}.atelier-thread__source-line>span{min-width:0}.atelier-thread__source-line>span:last-child{overflow-wrap:anywhere}.atelier-thread__source-line i{flex:0 0 17px;width:17px;max-width:17px}}
 .atelier-thread__actions .atelier-button{min-height:36px!important;height:36px!important;width:auto!important;margin:0!important;padding:0 15px!important;border:1px solid rgba(23,35,50,.72)!important;border-radius:0!important;background:#fffdfa!important;color:var(--atelier-ink)!important;font-size:9px!important;letter-spacing:.04em!important;line-height:1!important;white-space:nowrap!important;box-shadow:none!important}
 .atelier-thread__actions .atelier-button+.atelier-button{border-left:1px solid rgba(23,35,50,.72)!important}
 .atelier-thread__actions .atelier-button--primary{padding-inline:17px!important;background:var(--atelier-ink)!important;color:#fffdfa!important}
