@@ -20,13 +20,14 @@ La campagne a appliqué vingt contrôles spécialisés couvrant architecture, s�
 
 ## Correctifs issus de preuves
 
-Trois défauts ont été reproduits avant correction, puis rejoués après déploiement des versions ci-dessous.
+Trois défauts fonctionnels ont été reproduits avant correction, puis rejoués après déploiement. Une correction de compatibilité du validateur a ensuite été ajoutée afin que le même contrôle fonctionne sous PHP moderne en CI.
 
 | Référence | Correctif | Version | Contrôle de sortie |
 |---|---|---|---|
-| H01 | Le dry run contrôle désormais les références croisées utilisateur, forum, sujet et parent de réponse avant l’écriture. | PFC 0.4.18 | Le même pack relationnel invalide reste bloqué au dry run, sans création. |
+| H01 | Le dry run contrôle désormais les références croisées utilisateur, forum, sujet et parent de réponse avant l’écriture. | PFC 0.4.18, inclus dans 0.4.19 | Le même pack relationnel invalide reste bloqué au dry run, sans création. |
 | H05 | Les noms accessibles reprennent désormais les libellés visibles de la marque, des votes et de la Collection. | Atelier 0.4.32 | L’audit Lighthouse ciblé ne signale plus `label-content-name-mismatch` sur les cinq parcours contrôlés. |
-| H08 | La publication par la file PFC utilise les primitives bbPress de transition et resynchronise les compteurs du sujet et du forum concernés. | PFC 0.4.17, inclus dans 0.4.18 | Égalité confirmée entre cartes de réponse publiques et compteur rendu après une publication pending. |
+| H08 | La publication par la file PFC utilise les primitives bbPress de transition et resynchronise les compteurs du sujet et du forum concernés. | PFC 0.4.17, inclus dans 0.4.19 | Égalité confirmée entre cartes de réponse publiques et compteur rendu après une publication pending. |
+| H09 | Le validateur CSV traite les erreurs de date levées sous PHP moderne et retourne un diagnostic plutôt qu’un arrêt fatal. | PFC 0.4.19 | Le pack CSV invalide passe dans le harnais de CI avec des erreurs attendues et `pass=true`. |
 
 ## Résultats de laboratoire
 
@@ -57,7 +58,7 @@ Les comptes, contenus, votes, suivis et notifications créés pour la recette on
 ## Références techniques publiques
 
 - `atelier/` contient le thème Atelier à sa version corrigée.
-- `premium-forum-core/` contient l’extension PFC à sa version corrigée.
+- `premium-forum-core/` contient l’extension PFC 0.4.19, référence corrigée à ce jour.
 - `fixtures/` rassemble des jeux d’import exclusivement synthétiques, sans mots de passe ni informations personnelles.
 - `release/` contient les archives de release contrôlées avant déploiement.
 

@@ -2,18 +2,23 @@
 
 Ce changelog décrit les artefacts de référence livrés avec le dépôt public. Il ne contient ni accès, ni données de production, ni exports de base.
 
-## Référence de pré-bêta — Atelier 0.4.32 et Premium Forum Core 0.4.18
+## Référence de pré-bêta — Atelier 0.4.32 et Premium Forum Core 0.4.19
 
-La référence installable actuelle est le tag `atelier-prebeta-rc1`, accompagné de `ARTIFACTS-SHA256.txt`. Les seules archives de ce lot sont `release/atelier-0.4.32-a11y-visible-labels.zip` et `release/premium-forum-core-0.4.18-import-references.zip`.
+La référence installable actuelle est le tag `atelier-prebeta-rc2`, accompagné de `ARTIFACTS-SHA256.txt`. Les seules archives de ce lot sont `release/atelier-0.4.32-a11y-visible-labels.zip` et `release/premium-forum-core-0.4.19-csv-validation-compat.zip`.
 
 | Domaine | Évolution contenue |
 |---|---|
-| H01 — import | PFC 0.4.18 valide les relations utilisateur, forum, sujet et parent de réponse pendant le dry run, avant toute écriture. |
+| H01 — import | PFC 0.4.19 valide les relations utilisateur, forum, sujet et parent de réponse pendant le dry run, avant toute écriture. |
 | H05 — accessibilité | Atelier 0.4.32 aligne les noms accessibles de la marque, des votes et de la Collection avec les libellés visibles. |
 | H08 — bbPress | La publication PFC emploie les primitives bbPress pertinentes et resynchronise les compteurs ciblés. |
-| Référence | Manifeste SHA-256, matrice de tests, registre de risques, procédure d’installation/restauration et CI de vérification ajoutés. |
+| H09 — CI | PFC 0.4.19 intercepte les erreurs de date modernes sous `Throwable`, ce qui permet au dry run et au harnais hors WordPress de retourner un diagnostic plutôt qu’un fatal. |
+| Référence | Manifeste SHA-256, matrice de tests, registre de risques, procédure d’installation/restauration et CI de vérification ajoutés; CI verte exigée. |
 
 > **Limite de la référence.** Elle est apte à une recette isolée et à la préparation d’une bêta fermée sous conditions. Elle n’autorise pas une mise en production publique.
+
+## Jalon historique — atelier-prebeta-rc1
+
+Le tag `atelier-prebeta-rc1` est conservé comme trace immuable de la première tentative de gel. Sa CI a révélé un défaut de portabilité du validateur CSV sous PHP moderne lorsque le pack contient une date invalide. Il **ne doit pas être utilisé pour une installation de référence**. Le tag `atelier-prebeta-rc2` remplace cette candidate sans réécrire l’historique.
 
 ## Jalon historique — Atelier 0.4.31 et Premium Forum Core 0.4.16
 
@@ -31,7 +36,7 @@ Cette consolidation antérieure est conservée dans l’historique Git, mais **n
 
 ## Jalon historique — Premium Forum Core 0.4.11
 
-Ce jalon a stabilisé l’e-mail de recette. Il est historique; la référence d’installation actuelle est PFC 0.4.18 avec Atelier 0.4.32.
+Ce jalon a stabilisé l’e-mail de recette. Il est historique; la référence d’installation actuelle est PFC 0.4.19 avec Atelier 0.4.32.
 
 | Domaine | Évolution livrée |
 |---|---|

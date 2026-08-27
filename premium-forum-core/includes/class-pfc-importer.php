@@ -544,7 +544,7 @@ final class PFC_Importer {
 
 	private static function normalise_date( string $value ): string {
 		if ( '' === trim( $value ) ) { return ''; }
-		try { return ( new DateTimeImmutable( $value, wp_timezone() ) )->format( 'Y-m-d H:i:s' ); } catch ( Exception $e ) { return ''; }
+		try { return ( new DateTimeImmutable( $value, wp_timezone() ) )->format( 'Y-m-d H:i:s' ); } catch ( Throwable $e ) { return ''; }
 	}
 
 	private static function legacy_key( string $type, array $row ): string {
