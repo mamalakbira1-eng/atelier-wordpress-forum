@@ -16,8 +16,10 @@ final class PFC_Registration {
 	public static function init(): void {
 		add_action( 'login_init', array( __CLASS__, 'route_login' ) );
 		add_filter( 'authenticate', array( __CLASS__, 'block_unverified_user' ), 30, 3 );
-		add_filter( 'login_body_class', array( __CLASS__, 'login_body_class' ) );
-		add_action( 'wp_ajax_nopriv_pfc_check_username', array( __CLASS__, 'ajax_check_username' ) );
+			add_filter( 'login_body_class', array( __CLASS__, 'login_body_class' ) );
+			add_action( 'login_header', array( __CLASS__, 'open_standard_login_landmark' ), 1 );
+			add_action( 'login_footer', array( __CLASS__, 'close_standard_login_landmark' ), 99 );
+			add_action( 'wp_ajax_nopriv_pfc_check_username', array( __CLASS__, 'ajax_check_username' ) );
 		add_action( 'wp_ajax_pfc_check_username', array( __CLASS__, 'ajax_check_username' ) );
 	}
 
@@ -44,6 +46,27 @@ final class PFC_Registration {
 		$action = sanitize_key( $_REQUEST['action'] ?? '' );
 		if ( in_array( $action, array( 'register', 'verify', 'resend' ), true ) ) $classes[] = 'atelier-registration-route';
 		return $classes;
+	}
+
+	/**
+	 * WordPress core does not wrap wp-login.php in a main landmark. The custom
+	 * Atelier registration and verification views already render their own main,
+	 * so the wrapper is limited to standard login actions.
+	 */
+	public static function open_standard_login_landmark(): void {
+		$action = sanitize_key( $_REQUEST['action'] ?? '' );
+		if ( in_array( $action, array( 'register', 'verify', 'resend' ), true ) ) {
+			return;
+		}
+		echo '<main id="wp-login-main" aria-label="Connexion WordPress">';
+	}
+
+	public static function close_standard_login_landmark(): void {
+		$action = sanitize_key( $_REQUEST['action'] ?? '' );
+		if ( in_array( $action, array( 'register', 'verify', 'resend' ), true ) ) {
+			return;
+		}
+		echo '</main>';
 	}
 
 	public static function ajax_check_username(): void {
