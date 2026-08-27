@@ -527,42 +527,66 @@ final class PFC_Importer {
 		return (int) $user_id;
 	}
 
+	private static function existing_post_by_legacy( string $post_type, string $legacy_id ): int {
+		if ( '' === trim( $legacy_id ) ) { return 0; }
+		$ids = get_posts( array( 'post_type' => $post_type, 'post_status' => 'any', 'meta_key' => '_pfc_legacy_id', 'meta_value' => $legacy_id, 'numberposts' => 1, 'fields' => 'ids', 'no_found_rows' => true ) );
+		return (int) ( $ids[0] ?? 0 );
+	}
+
 	private static function import_forum( int $job_id, array $row, int $line, array $forums ): int {
+		$existing = self::existing_post_by_legacy( 'forum', (string) $row['legacy_forum_id'] );
+		if ( $existing ) {
+			self::add_item( $job_id, 'forum', $row['legacy_forum_id'], $existing, 'matched', $line, array() );
+			return $existing;
+		}
 		$parent = $forums[ (string) ( $row['parent_legacy_forum_id'] ?? '' ) ] ?? 0;
 		$forum  = bbp_insert_forum( array( 'post_title' => sanitize_text_field( $row['title'] ), 'post_content' => wp_kses_post( $row['description'] ?? '' ), 'post_parent' => $parent, 'post_status' => 'private' === ( $row['status'] ?? '' ) ? bbp_get_private_status_id() : bbp_get_public_status_id() ) );
 		if ( is_wp_error( $forum ) || ! $forum ) { throw new RuntimeException( 'Création du forum impossible.' ); }
 		update_post_meta( $forum, '_pfc_import_job', $job_id );
+		update_post_meta( $forum, '_pfc_legacy_id', sanitize_text_field( $row['legacy_forum_id'] ) );
 		self::record_created( $job_id, 'forum', $row['legacy_forum_id'], $forum, $line );
 		return (int) $forum;
 	}
 
 	private static function import_topic( int $job_id, array $row, int $line, array $users, array $forums ): int {
+		$existing = self::existing_post_by_legacy( 'topic', (string) $row['legacy_topic_id'] );
+		if ( $existing ) {
+			self::add_item( $job_id, 'topic', $row['legacy_topic_id'], $existing, 'matched', $line, array() );
+			return $existing;
+		}
 		$author = $users[ (string) $row['legacy_author_id'] ] ?? 0;
 		$forum  = $forums[ (string) $row['legacy_forum_id'] ] ?? 0;
 		if ( ! $author || ! $forum ) { throw new RuntimeException( 'Mapping auteur ou forum absent pour un sujet.' ); }
 		$date = self::normalise_date( $row['created_at'] );
 		$topic = bbp_insert_topic( array( 'post_parent' => $forum, 'post_author' => $author, 'post_title' => sanitize_text_field( $row['title'] ), 'post_content' => wp_kses_post( $row['content'] ), 'post_name' => sanitize_title( $row['slug'] ?: $row['title'] ), 'post_status' => bbp_get_public_status_id(), 'post_date' => $date, 'post_date_gmt' => get_gmt_from_date( $date ) ) );
 		if ( is_wp_error( $topic ) || ! $topic ) { throw new RuntimeException( 'Création du sujet impossible.' ); }
-		self::import_meta( $topic, $job_id, $row );
+		self::import_meta( $topic, $job_id, $row, 'topic' );
 		self::record_created( $job_id, 'topic', $row['legacy_topic_id'], $topic, $line );
 		return (int) $topic;
 	}
 
 	private static function import_reply( int $job_id, array $row, int $line, array $users, array $topics ): int {
+		$existing = self::existing_post_by_legacy( 'reply', (string) $row['legacy_reply_id'] );
+		if ( $existing ) {
+			self::add_item( $job_id, 'reply', $row['legacy_reply_id'], $existing, 'matched', $line, array() );
+			return $existing;
+		}
 		$author = $users[ (string) $row['legacy_author_id'] ] ?? 0;
 		$topic  = $topics[ (string) $row['legacy_topic_id'] ] ?? 0;
 		if ( ! $author || ! $topic ) { throw new RuntimeException( 'Mapping auteur ou sujet absent pour une réponse.' ); }
 		$date  = self::normalise_date( $row['created_at'] );
 		$reply = bbp_insert_reply( array( 'post_parent' => $topic, 'post_author' => $author, 'post_content' => wp_kses_post( $row['content'] ), 'post_status' => bbp_get_public_status_id(), 'post_date' => $date, 'post_date_gmt' => get_gmt_from_date( $date ) ) );
 		if ( is_wp_error( $reply ) || ! $reply ) { throw new RuntimeException( 'Création de la réponse impossible.' ); }
-		self::import_meta( $reply, $job_id, $row );
+		self::import_meta( $reply, $job_id, $row, 'reply' );
 		self::record_created( $job_id, 'reply', $row['legacy_reply_id'], $reply, $line );
 		return (int) $reply;
 	}
 
-	private static function import_meta( int $post_id, int $job_id, array $row ): void {
+	private static function import_meta( int $post_id, int $job_id, array $row, string $type = '' ): void {
+		$legacy_fields = array( 'topic' => 'legacy_topic_id', 'reply' => 'legacy_reply_id' );
+		$legacy_id = $legacy_fields[ $type ] ?? self::legacy_key( '', $row );
 		update_post_meta( $post_id, '_pfc_import_job', $job_id );
-		update_post_meta( $post_id, '_pfc_legacy_id', self::legacy_key( '', $row ) );
+		update_post_meta( $post_id, '_pfc_legacy_id', sanitize_text_field( (string) ( $row[ $legacy_id ] ?? '' ) ) );
 		update_post_meta( $post_id, 'pfc_legacy_upvotes_count', absint( $row['upvotes_count'] ?? 0 ) );
 		update_post_meta( $post_id, 'pfc_native_upvotes_count', 0 );
 		if ( ! empty( $row['updated_at'] ) ) { update_post_meta( $post_id, 'pfc_historical_updated_at', self::normalise_date( $row['updated_at'] ) ); }
