@@ -261,3 +261,6 @@ body .atelier-header__search-wrap{position:relative;flex:none}body .atelier-head
 
 /* Atelier — accessibilité : vermillon assombri pour les repères, boutons et microcopies sur papier clair. */
 :root{--atelier-vermilion:#b63b2b}
+/* Accessibility: bbPress quicktag controls must remain readable in the Atelier palette. */
+.ed_button.button.button-small{background:#fff;border:1px solid #17324d;color:#17324d;font-weight:700}
+.ed_button.button.button-small:hover,.ed_button.button.button-small:focus{background:#17324d;border-color:#17324d;color:#fff}
