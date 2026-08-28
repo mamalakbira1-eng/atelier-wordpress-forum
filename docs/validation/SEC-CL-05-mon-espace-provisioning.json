@@ -1,0 +1,25 @@
+{
+    "objective": "SEC-CL-05",
+    "target": "route mon-espace résolue et provisioning idempotent de 4 pages éditoriales",
+    "observed": {
+        "discussions": {
+            "action": "existing",
+            "id": 200
+        },
+        "espaces": {
+            "action": "existing",
+            "id": 201
+        },
+        "methodes": {
+            "action": "existing",
+            "id": 202
+        },
+        "mon-espace": {
+            "action": "existing",
+            "id": 203
+        }
+    },
+    "exit_code": 0,
+    "status": "PASS",
+    "blocked_reason": null
+}

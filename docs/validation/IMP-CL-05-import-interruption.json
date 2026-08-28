@@ -1,0 +1,15 @@
+{
+    "objective": "IMP-CL-05",
+    "target": "interruption déterministe après 2 objets puis rollback complet",
+    "observed": {
+        "job_after_rollback": {
+            "status": "rolled_back",
+            "last_error": "Interruption injectée par le test local après 2 objet(s)."
+        },
+        "objects_marked_by_job_remaining": 0,
+        "rolled_back_audit_items": 2
+    },
+    "exit_code": 0,
+    "status": "PASS",
+    "blocked_reason": null
+}

@@ -8,6 +8,7 @@ defined( 'ABSPATH' ) || exit;
 final class PFC_Importer {
 	private const JOBS_TABLE  = 'pfc_import_jobs';
 	private const ITEMS_TABLE = 'pfc_import_items';
+	private static int $local_test_import_count = 0;
 
 	public static function init(): void {
 		add_action( 'admin_post_pfc_upload_pack', array( __CLASS__, 'upload_pack' ) );
@@ -235,24 +236,34 @@ final class PFC_Importer {
 			self::redirect( $job_id, 'error', 'Un dry run valide est obligatoire avant l’import.' );
 		}
 
-		try {
-			self::set_job( $job_id, 'running' );
+					try {
+				self::$local_test_import_count = 0;
+				self::set_job( $job_id, 'running' );
+
 			$rows    = self::read_pack( $job->source_dir );
 			$mapping = array( 'users' => array(), 'forums' => array(), 'topics' => array() );
-			foreach ( $rows['users'] as $number => $row ) {
-				$user_id = self::import_user( $job_id, $row, $number );
+							foreach ( $rows['users'] as $number => $row ) {
+					self::maybe_interrupt_for_local_test( $job_id, 'user', $row, $number );
+					$user_id = self::import_user( $job_id, $row, $number );
+
 				$mapping['users'][ (string) $row['legacy_user_id'] ] = $user_id;
 			}
-			foreach ( $rows['forums'] as $number => $row ) {
-				$forum_id = self::import_forum( $job_id, $row, $number, $mapping['forums'] );
+							foreach ( $rows['forums'] as $number => $row ) {
+					self::maybe_interrupt_for_local_test( $job_id, 'forum', $row, $number );
+					$forum_id = self::import_forum( $job_id, $row, $number, $mapping['forums'] );
+
 				$mapping['forums'][ (string) $row['legacy_forum_id'] ] = $forum_id;
 			}
-			foreach ( $rows['topics'] as $number => $row ) {
-				$topic_id = self::import_topic( $job_id, $row, $number, $mapping['users'], $mapping['forums'] );
+							foreach ( $rows['topics'] as $number => $row ) {
+					self::maybe_interrupt_for_local_test( $job_id, 'topic', $row, $number );
+					$topic_id = self::import_topic( $job_id, $row, $number, $mapping['users'], $mapping['forums'] );
+
 				$mapping['topics'][ (string) $row['legacy_topic_id'] ] = $topic_id;
 			}
-			foreach ( $rows['replies'] as $number => $row ) {
-				self::import_reply( $job_id, $row, $number, $mapping['users'], $mapping['topics'] );
+							foreach ( $rows['replies'] as $number => $row ) {
+					self::maybe_interrupt_for_local_test( $job_id, 'reply', $row, $number );
+					self::import_reply( $job_id, $row, $number, $mapping['users'], $mapping['topics'] );
+
 			}
 				self::recount( $mapping['forums'], $mapping['topics'], $mapping['users'] );
 			self::set_job( $job_id, 'completed', array_merge( (array) json_decode( $job->summary, true ), array( 'completed_at' => current_time( 'mysql', true ) ) ) );
@@ -263,7 +274,22 @@ final class PFC_Importer {
 		}
 	}
 
-	public static function rollback_import(): void {
+			private static function maybe_interrupt_for_local_test( int $job_id, string $type, array $row, int $number ): void {
+			if ( ! defined( 'PFC_LOCAL_TESTING' ) || true !== PFC_LOCAL_TESTING ) {
+				return;
+			}
+			$limit = absint( apply_filters( 'pfc_local_test_interrupt_after', 0, $job_id, $type, $row, $number ) );
+			if ( $limit < 1 ) {
+				return;
+			}
+			if ( self::$local_test_import_count >= $limit ) {
+				throw new RuntimeException( 'Interruption injectée par le test local après ' . $limit . ' objet(s).' );
+			}
+			self::$local_test_import_count++;
+		}
+
+		public static function rollback_import(): void {
+
 		self::guard( 'pfc_rollback_import' );
 		$job_id = absint( $_POST['job_id'] ?? 0 );
 		$items  = self::items( $job_id, array( 'created' ) );

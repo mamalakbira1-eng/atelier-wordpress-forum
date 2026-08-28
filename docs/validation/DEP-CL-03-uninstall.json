@@ -1,0 +1,27 @@
+{
+    "objective": "DEP-CL-03",
+    "target": "politique non destructive; 3 options techniques supprimées; 5 tables et posts conservés",
+    "observed": {
+        "tables_exist": true,
+        "options_removed": true,
+        "before": {
+            "wp_pfc_import_jobs": 0,
+            "wp_pfc_import_items": 0,
+            "wp_pfc_votes": 0,
+            "wp_pfc_follows": 0,
+            "wp_pfc_notifications": 0
+        },
+        "after": {
+            "wp_pfc_import_jobs": 0,
+            "wp_pfc_import_items": 0,
+            "wp_pfc_votes": 0,
+            "wp_pfc_follows": 0,
+            "wp_pfc_notifications": 0
+        },
+        "posts_before": 11,
+        "posts_after": 11
+    },
+    "exit_code": 0,
+    "status": "PASS",
+    "blocked_reason": null
+}
