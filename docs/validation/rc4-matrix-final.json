@@ -1,0 +1,16 @@
+{
+  "timestamp_utc": "2026-08-28T00:54:49.758194+00:00",
+  "commit": "84c5cfcf31d89cd613fedf2936b3cbba90b09b6b",
+  "objectives": 40,
+  "counts": {
+    "BLOCKED": 6,
+    "BLOCKED_EXTERNAL": 1,
+    "BLOCKED_HUMAN": 2,
+    "PASS": 31
+  },
+  "decision": "NO-GO",
+  "reason": "preuves locales restantes non rejouées; human/external scope conservé",
+  "email_scope": "excluded",
+  "external_scope": "blocked_external",
+  "human_scope": "blocked_human"
+}
