@@ -1,6 +1,6 @@
 /* Theme Name: Atelier
  * Description: Thème premium LLM-first pour bbPress.
- * Version: 0.4.32
+ * Version: 0.4.34
  */
 /* Atelier — cadrage prioritaire du visuel LCP : le papier et le ruban, jamais une plage sombre vide. */
 body .atelier-home__hero-art img{object-position:100% center}
@@ -179,7 +179,7 @@ body .atelier-header__search-wrap{position:relative;flex:none}body .atelier-head
 
 /* Atelier — parité React v3 : une seule hiérarchie finale pour éviter les rectangles bbPress et les overrides contradictoires. */
 .atelier-thread__deck{max-width:680px;margin:21px 0 0;color:var(--atelier-soft);font-size:16px;line-height:1.72}
-.atelier-thread h1[dir="rtl"]{max-width:680px;font-size:clamp(2.55rem,4.6vw,4.25rem)!important;line-height:1.16!important;letter-spacing:0!important;font-weight:700!important}
+.atelier-thread h1[dir="rtl"]{max-width:720px;font-size:clamp(1.5rem,2.5vw,2.4rem)!important;line-height:1.3!important;letter-spacing:0!important;font-weight:700!important}
 .atelier-thread__actions{align-items:stretch!important;gap:8px!important;margin-top:25px!important}
 .atelier-thread__actions .atelier-button{min-height:37px!important;height:37px!important;padding:0 12px!important;border:1px solid var(--atelier-line)!important;background:transparent!important;color:var(--atelier-ink)!important;font-size:11px!important;font-weight:800!important;letter-spacing:0!important;gap:7px!important;transition:background .16s ease,border-color .16s ease,color .16s ease,transform .16s ease!important}
 .atelier-thread__actions .atelier-button svg{width:16px!important;height:16px!important;flex:0 0 16px!important}
@@ -239,7 +239,7 @@ body .atelier-header__search-wrap{position:relative;flex:none}body .atelier-head
 .atelier-collection-card small{margin-top:8px!important;color:var(--atelier-ink)!important;font-size:9px!important;font-weight:900!important;text-decoration:underline;text-underline-offset:3px}
 .atelier-collection-card:hover strong,.atelier-collection-card:hover small{color:var(--atelier-vermilion)!important}
 @media(max-width:1050px){.atelier-thread__aside{padding-top:0}.atelier-thread__deck{font-size:15px}}
-@media(max-width:700px){.atelier-thread h1[dir="rtl"]{font-size:clamp(2.15rem,9.5vw,3.25rem)!important;line-height:1.2!important}.atelier-thread__deck{font-size:14px;line-height:1.65}.atelier-thread__actions{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:8px!important}.atelier-thread__actions .atelier-button{width:100%!important}.atelier-initial-post .atelier-post-meta{align-items:flex-start;flex-direction:column}.atelier-initial-post .atelier-post-meta time{margin-left:0}.atelier-post-footer{align-items:flex-start!important;flex-direction:column!important;gap:12px!important}.atelier-source-note{margin-left:0}.atelier-collection-card{grid-template-columns:76px minmax(0,1fr)!important}.atelier-collection-card::before{width:76px;min-height:76px}}
+@media(max-width:700px){.atelier-thread h1[dir="rtl"]{font-size:clamp(1.5rem,7vw,2.15rem)!important;line-height:1.32!important}.atelier-thread__deck{font-size:14px;line-height:1.65}.atelier-thread__actions{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:8px!important}.atelier-thread__actions .atelier-button{width:100%!important}.atelier-initial-post .atelier-post-meta{align-items:flex-start;flex-direction:column}.atelier-initial-post .atelier-post-meta time{margin-left:0}.atelier-post-footer{align-items:flex-start!important;flex-direction:column!important;gap:12px!important}.atelier-source-note{margin-left:0}.atelier-collection-card{grid-template-columns:76px minmax(0,1fr)!important}.atelier-collection-card::before{width:76px;min-height:76px}}
 
 
 /* Atelier — ordre React verrouillé : Répondre, Suivre, Partager, Enregistrer. */
