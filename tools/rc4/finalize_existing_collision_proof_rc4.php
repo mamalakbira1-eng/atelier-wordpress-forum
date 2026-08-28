@@ -1,0 +1,8 @@
+<?php
+$first = (int) ( $argv[1] ?? 0 ); $second = (int) ( $argv[2] ?? 0 );
+require dirname( __DIR__ ) . '/wp/wp-load.php';
+global $wpdb;
+$rows = $wpdb->get_results( $wpdb->prepare( "SELECT job_id, object_type, action_name, COUNT(*) total FROM {$wpdb->prefix}pfc_import_items WHERE job_id IN (%d,%d) GROUP BY job_id, object_type, action_name ORDER BY job_id, object_type, action_name", $first, $second ), ARRAY_A );
+$created = 0; $matched = 0; foreach ( $rows as $row ) { if ( (int) $row['job_id'] === $second && 'created' === $row['action_name'] ) { $created += (int) $row['total']; } if ( (int) $row['job_id'] === $second && 'matched' === $row['action_name'] ) { $matched += (int) $row['total']; } }
+$out = array( 'objective' => 'IMP-CL-03', 'target' => 'collision pack after existing objects: 0 creation, 4 correspondances', 'jobs' => array( 'initial' => $first, 'collision' => $second ), 'item_groups' => $rows, 'observed' => array( 'collision_created' => $created, 'collision_matched' => $matched ), 'exit_code' => ( 0 === $created && 4 === $matched ) ? 0 : 1, 'status' => ( 0 === $created && 4 === $matched ) ? 'PASS' : 'FAIL', 'commands' => array( 'test_import_nominal_local.php prepare/dry/execute x2', 'php tools/finalize_existing_collision_proof_rc4.php INITIAL COLLISION' ), 'artifacts' => array( 'IMP-CL-03-existing-duplicates.json' ), 'blocked_reason' => null );
+file_put_contents( '/home/ubuntu/atelier-cdc-20/proofs-rc4-local/IMP-CL-03-existing-duplicates.json', json_encode( $out, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE ) . PHP_EOL ); echo json_encode( $out, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE ) . PHP_EOL; exit( $out['exit_code'] );

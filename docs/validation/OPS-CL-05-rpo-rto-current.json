@@ -1,0 +1,15 @@
+{
+  "objective": "OPS-CL-05",
+  "target": "RPO/RTO local mesurés sur le même cycle",
+  "observed": {
+    "backup_ms": 176,
+    "restore_ms": 3621,
+    "verify_ms": 3465,
+    "rpo_ms": 176,
+    "rto_ms": 7086,
+    "scope": "local_only"
+  },
+  "exit_code": 0,
+  "status": "PASS",
+  "blocked_reason": null
+}

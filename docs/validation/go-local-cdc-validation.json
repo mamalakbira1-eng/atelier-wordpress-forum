@@ -1,0 +1,219 @@
+{
+  "objective": "CDC-GO-LOCAL-STRUCTURE",
+  "timestamp_utc": "2026-08-28T01:24:57.206800+00:00",
+  "target": "18 objectifs; 6 rubriques obligatoires par objectif",
+  "observed": {
+    "objective_count": 18,
+    "checks": [
+      {
+        "objective": "GO-LOC-01",
+        "fields": {
+          "target": true,
+          "proof": true,
+          "exit": true,
+          "pass": true,
+          "fail": true,
+          "blocked": true
+        }
+      },
+      {
+        "objective": "GO-LOC-02",
+        "fields": {
+          "target": true,
+          "proof": true,
+          "exit": true,
+          "pass": true,
+          "fail": true,
+          "blocked": true
+        }
+      },
+      {
+        "objective": "GO-IMP-01",
+        "fields": {
+          "target": true,
+          "proof": true,
+          "exit": true,
+          "pass": true,
+          "fail": true,
+          "blocked": true
+        }
+      },
+      {
+        "objective": "GO-IMP-02",
+        "fields": {
+          "target": true,
+          "proof": true,
+          "exit": true,
+          "pass": true,
+          "fail": true,
+          "blocked": true
+        }
+      },
+      {
+        "objective": "GO-IMP-03",
+        "fields": {
+          "target": true,
+          "proof": true,
+          "exit": true,
+          "pass": true,
+          "fail": true,
+          "blocked": true
+        }
+      },
+      {
+        "objective": "GO-IMP-04",
+        "fields": {
+          "target": true,
+          "proof": true,
+          "exit": true,
+          "pass": true,
+          "fail": true,
+          "blocked": true
+        }
+      },
+      {
+        "objective": "GO-IMP-05",
+        "fields": {
+          "target": true,
+          "proof": true,
+          "exit": true,
+          "pass": true,
+          "fail": true,
+          "blocked": true
+        }
+      },
+      {
+        "objective": "GO-SEC-01",
+        "fields": {
+          "target": true,
+          "proof": true,
+          "exit": true,
+          "pass": true,
+          "fail": true,
+          "blocked": true
+        }
+      },
+      {
+        "objective": "GO-SEC-02",
+        "fields": {
+          "target": true,
+          "proof": true,
+          "exit": true,
+          "pass": true,
+          "fail": true,
+          "blocked": true
+        }
+      },
+      {
+        "objective": "GO-SEC-03",
+        "fields": {
+          "target": true,
+          "proof": true,
+          "exit": true,
+          "pass": true,
+          "fail": true,
+          "blocked": true
+        }
+      },
+      {
+        "objective": "GO-SEC-04",
+        "fields": {
+          "target": true,
+          "proof": true,
+          "exit": true,
+          "pass": true,
+          "fail": true,
+          "blocked": true
+        }
+      },
+      {
+        "objective": "GO-SEC-05",
+        "fields": {
+          "target": true,
+          "proof": true,
+          "exit": true,
+          "pass": true,
+          "fail": true,
+          "blocked": true
+        }
+      },
+      {
+        "objective": "GO-MOD-01",
+        "fields": {
+          "target": true,
+          "proof": true,
+          "exit": true,
+          "pass": true,
+          "fail": true,
+          "blocked": true
+        }
+      },
+      {
+        "objective": "GO-COM-01",
+        "fields": {
+          "target": true,
+          "proof": true,
+          "exit": true,
+          "pass": true,
+          "fail": true,
+          "blocked": true
+        }
+      },
+      {
+        "objective": "GO-COM-02",
+        "fields": {
+          "target": true,
+          "proof": true,
+          "exit": true,
+          "pass": true,
+          "fail": true,
+          "blocked": true
+        }
+      },
+      {
+        "objective": "GO-OPS-01",
+        "fields": {
+          "target": true,
+          "proof": true,
+          "exit": true,
+          "pass": true,
+          "fail": true,
+          "blocked": true
+        }
+      },
+      {
+        "objective": "GO-OPS-02",
+        "fields": {
+          "target": true,
+          "proof": true,
+          "exit": true,
+          "pass": true,
+          "fail": true,
+          "blocked": true
+        }
+      },
+      {
+        "objective": "GO-OPS-03",
+        "fields": {
+          "target": true,
+          "proof": true,
+          "exit": true,
+          "pass": true,
+          "fail": true,
+          "blocked": true
+        }
+      }
+    ],
+    "missing": [],
+    "local_scope": true
+  },
+  "exit_code": 0,
+  "status": "PASS",
+  "commands": [
+    "python3 tools/validate_go_local_cdc.py"
+  ],
+  "artifacts": [
+    "cdc-go-strictement-local-rc4.md"
+  ],
+  "blocked_reason": null
+}

@@ -1,0 +1,104 @@
+{
+  "base": "http://127.0.0.1:8090",
+  "results": [
+    {
+      "name": "home",
+      "path": "/",
+      "status": 200,
+      "html_bytes": 27247,
+      "title": true,
+      "lang": "en-US",
+      "dir": "",
+      "canonical": "http://127.0.0.1:8090",
+      "meta_description": true,
+      "robots": "noindex, nofollow",
+      "jsonld_types": [],
+      "qapage": false,
+      "pending_marker": false
+    },
+    {
+      "name": "forum",
+      "path": "/forums/forum/cdc-forum/",
+      "status": 200,
+      "html_bytes": 37963,
+      "title": true,
+      "lang": "en-US",
+      "dir": "",
+      "canonical": "http://127.0.0.1:8090/forums/forum/cdc-forum/",
+      "meta_description": true,
+      "robots": "noindex, nofollow",
+      "jsonld_types": [
+        "BreadcrumbList"
+      ],
+      "qapage": false,
+      "pending_marker": false
+    },
+    {
+      "name": "topic_fr",
+      "path": "/forums/topic/cdc-topic/",
+      "status": 200,
+      "html_bytes": 35869,
+      "title": true,
+      "lang": "en-US",
+      "dir": "",
+      "canonical": "http://127.0.0.1:8090/forums/topic/cdc-topic/",
+      "meta_description": true,
+      "robots": "noindex, nofollow",
+      "jsonld_types": [
+        "DiscussionForumPosting",
+        "BreadcrumbList",
+        "DiscussionForumPosting",
+        "BreadcrumbList"
+      ],
+      "qapage": false,
+      "pending_marker": false
+    },
+    {
+      "name": "topic_ar",
+      "path": "/forums/topic/sources-arabes-connaissance/",
+      "status": 200,
+      "html_bytes": 36771,
+      "title": true,
+      "lang": "ar",
+      "dir": "rtl",
+      "canonical": "http://127.0.0.1:8090/forums/topic/sources-arabes-connaissance/",
+      "meta_description": true,
+      "robots": "noindex, nofollow",
+      "jsonld_types": [
+        "DiscussionForumPosting",
+        "BreadcrumbList",
+        "DiscussionForumPosting",
+        "BreadcrumbList"
+      ],
+      "qapage": false,
+      "pending_marker": false
+    },
+    {
+      "name": "pending",
+      "path": "/?post_type=topic&p=218",
+      "status": 404,
+      "html_bytes": 26995,
+      "title": true,
+      "lang": "en-US",
+      "dir": "",
+      "canonical": "",
+      "meta_description": true,
+      "robots": "noindex, nofollow",
+      "jsonld_types": [],
+      "qapage": false,
+      "pending_marker": false
+    }
+  ],
+  "checks": {
+    "public_pages_200": true,
+    "pending_denied": true,
+    "titles_4_public": true,
+    "descriptions_4_public": true,
+    "canonical_3_content": true,
+    "rtl_ar": true,
+    "jsonld_discussion_breadcrumb": true,
+    "no_qapage": true,
+    "pending_not_exposed": true
+  },
+  "exit_code": 0
+}

@@ -1,0 +1,31 @@
+{
+  "pfc_limit_bytes": 5242880,
+  "php_upload_max_filesize": "8M (serveur PHP local configuré pour ce test)",
+  "php_post_max_size": "12M (serveur PHP local configuré pour ce test)",
+  "effective_php_upload_bytes": null,
+  "files": [
+    {
+      "name": "below",
+      "size": 5242879,
+      "job": 84,
+      "notice_present": true,
+      "last_item": ""
+    },
+    {
+      "name": "above",
+      "size": 5242881,
+      "job": 85,
+      "notice_present": true,
+      "last_item": "error:0:{\"message\":\"Taille du pack excessive : maximum 5 Mo par fichier et 20 Mo au total.\"}"
+    }
+  ],
+  "db_before_fingerprint": "327",
+  "db_after_fingerprint": "327",
+  "object_delta_zero": true,
+  "environment_prevents_boundary": false,
+  "below_transport_accepted": true,
+  "above_rejected": true,
+  "exit_code": 0,
+  "status": "PASS",
+  "blocked_reason": null
+}

@@ -1,0 +1,20 @@
+{
+  "objective": "OPS-CL-04",
+  "timestamp_utc": "2026-08-28T01:29:06Z",
+  "environment": "local-8091",
+  "target": "backup puis restauration isolée; accueil et topic HTTP 200; versions conservées; instance détruite",
+  "observed": {
+    "restore_http_home": 200,
+    "restore_http_topic": 200,
+    "wordpress": "7.1",
+    "bbpress": "2.6.14",
+    "pfc": "0.4.19",
+    "restore_port": 8091,
+    "backup_ms": 176,
+    "restore_ms": 3621,
+    "verify_ms": 3465
+  },
+  "exit_code": 0,
+  "status": "PASS",
+  "blocked_reason": null
+}

@@ -4,7 +4,7 @@
 
 ## Décision consolidée
 
-La matrice finale contient 40 objectifs : **31 PASS**, **6 BLOCKED**, **2 BLOCKED_HUMAN** et **1 BLOCKED_EXTERNAL**. Le statut de la campagne reste **NO-GO**, car les preuves locales manquantes ne peuvent pas être converties en validations par simple présence de code.
+La matrice finale contient 40 objectifs : **37 PASS**, **2 BLOCKED_HUMAN** et **1 BLOCKED_EXTERNAL**. Le statut de la campagne reste **NO-GO**, car les prérequis humains et externes ne peuvent pas être convertis en validations locales par simple présence de code.
 
 ## Correctifs implémentés
 
@@ -16,13 +16,17 @@ Le lot ajoute une politique PFC d’uninstall non destructive : trois options te
 |---|---|---|---|---:|
 | `DEP-CL-03` | PASS | politique écrite, 3 options retirées, tables et contenus conservés | `DEP-CL-03-uninstall.json` | 0 |
 | `IMP-CL-05` | PASS | interruption après exactement 2 objets, job `rolled_back`, 0 objet marqué restant | `IMP-CL-05-import-interruption.json` | 0 |
-| `SEC-CL-05` — route | PASS partiel | provisioning idempotent de 4 pages, `mon-espace` résolu | `SEC-CL-05-mon-espace-provisioning.json` | 0 |
-
-Le PASS de provisioning ne vaut pas encore PASS complet du cache privé cross-user : les dix observations HTTP sur cinq URLs privées avec deux utilisateurs doivent encore être capturées si cet objectif reste applicable.
+| `SEC-CL-05` — route/cache | PASS | provisioning idempotent de 4 pages et 10 observations HTTP cross-user sans fuite | `SEC-CL-05-mon-espace-provisioning.json`, `SEC-CL-05-private-cache.json` | 0 |
+| `IMP-CL-02` | PASS | 5 Mo moins un accepté, 5 Mo plus un refusé, delta base nul | `IMP-CL-02-size-limit.json` | 0 |
+| `IMP-CL-03` | PASS | collision sur objets existants : 4 correspondances, 0 création | `IMP-CL-03-existing-duplicates.json` | 0 |
+| `A11Y-CL-02` | PASS | 6 pages × 20 Tab, zéro focus invisible et zéro tabindex positif | `A11Y-CL-02-keyboard.json` | 0 |
+| `MOD-CL-02` | PASS | 15 assertions de capacités conformes | `MOD-CL-02-capabilities.json` | 0 |
+| `OPS-CL-04` | PASS | restauration isolée, accueil/topic HTTP 200, versions vérifiées, instance détruite | `OPS-CL-04-restore-current.json` | 0 |
+| `OPS-CL-05` | PASS | RPO 176 ms, RTO 7086 ms sur le même cycle | `OPS-CL-05-rpo-rto-current.json` | 0 |
 
 ## Blocages conservés
 
-Le statut global reste **NO-GO** tant que les objectifs encore absents de preuves ne sont pas rejoués. La matrice générée est rattachée au SHA final publié et conserve les statuts `BLOCKED`, `BLOCKED_HUMAN` et `BLOCKED_EXTERNAL` séparément. Les points non convertis artificiellement sont `IMP-CL-02`, `IMP-CL-03`, `OPS-CL-04`, `OPS-CL-05`, le cache privé cross-user complet, les prérequis humains d’accessibilité et le contrôle externe. Un timeout de harnais ou une absence d’environnement ne doit pas être requalifié en PASS.
+Le statut global reste **NO-GO** uniquement en raison de deux contrôles humains et d’un contrôle externe. Les objectifs techniques locaux d’import, de cache, d’accessibilité automatisée, de capacités et de restauration sont désormais rattachés à des preuves PASS. Les contrôles humains `A11Y-CL-04` et `A11Y-CL-05` ainsi que `GATE-CL-02` restent explicitement séparés. Un timeout de harnais ou une absence d’environnement ne doit pas être requalifié en PASS.
 
 ## Nettoyage
 

@@ -1,12 +1,11 @@
 {
-  "timestamp_utc": "2026-08-28T00:54:49.758194+00:00",
-  "commit": "84c5cfcf31d89cd613fedf2936b3cbba90b09b6b",
+  "timestamp_utc": "2026-08-28T01:33:25.089334+00:00",
+  "commit": "63b3314111de85a343875ef2b45b2bfecf659c9d",
   "objectives": 40,
   "counts": {
-    "BLOCKED": 6,
     "BLOCKED_EXTERNAL": 1,
     "BLOCKED_HUMAN": 2,
-    "PASS": 31
+    "PASS": 37
   },
   "decision": "NO-GO",
   "reason": "preuves locales restantes non rejouées; human/external scope conservé",

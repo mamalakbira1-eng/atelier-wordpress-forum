@@ -52,3 +52,37 @@ add_filter( 'login_headertext', static function(): string { return 'Atelier — 
 add_filter( 'login_display_language_dropdown', '__return_false' );
 add_filter( 'login_message', static function( string $message ): string { $action = sanitize_key( $_REQUEST['action'] ?? '' ); if ( in_array( $action, array( 'register', 'verify', 'resend' ), true ) ) return $message; $register_url = add_query_arg( 'action', 'register', wp_login_url() ); return '<div class="atelier-login-intro"><p class="atelier-kicker">Forum de connaissances</p><h2>Retrouver les conversations qui comptent.</h2><p>Connectez-vous pour répondre, suivre les sujets et retrouver votre archive membre.</p><p class="atelier-login-register"><span>Premier passage ?</span> <a href="' . esc_url( $register_url ) . '">Créer mon accès Atelier <span aria-hidden="true">↗</span></a></p></div>' . $message; } );
 add_action( 'login_footer', static function(): void { echo '<p class="atelier-login-back"><a href="' . esc_url( home_url( '/' ) ) . '">← Retourner au forum</a></p>'; } );
+
+/** Atelier — SEO local explicite : descriptions, canonicals et données structurées sans dépendance externe. */
+add_action( 'wp_head', static function(): void {
+	if ( is_admin() || is_feed() ) { return; }
+	$object = get_queried_object();
+	$title  = wp_get_document_title();
+	$description = '';
+	if ( $object instanceof WP_Post ) {
+		$description = wp_trim_words( wp_strip_all_tags( (string) $object->post_content ), 28, '…' );
+	}
+	if ( '' === $description ) { $description = 'Atelier — forum de connaissances et discussions documentées.'; }
+	echo '<meta name="description" content="' . esc_attr( $description ) . '" />' . "\n";
+	if ( is_singular() || is_page() || is_home() || is_front_page() ) {
+		echo '<link rel="canonical" href="' . esc_url( (string) ( is_singular() ? get_permalink() : home_url( add_query_arg( array(), $GLOBALS['wp']->request ?? '' ) ) ) ) . '" />' . "\n";
+	}
+	if ( is_singular() && function_exists( 'bbp_get_topic_post_type' ) && $object instanceof WP_Post && $object->post_type === bbp_get_topic_post_type() ) {
+		$author = get_userdata( (int) $object->post_author );
+		$discussion = array(
+			'@context' => 'https://schema.org',
+			'@type' => 'DiscussionForumPosting',
+			'headline' => get_the_title( $object ),
+			'url' => get_permalink( $object ),
+			'datePublished' => get_post_time( DATE_W3C, true, $object ),
+			'articleBody' => wp_strip_all_tags( (string) $object->post_content ),
+			'author' => array( '@type' => 'Person', 'name' => $author ? $author->display_name : 'Atelier' ),
+		);
+		$breadcrumb = array( '@context' => 'https://schema.org', '@type' => 'BreadcrumbList', 'itemListElement' => array(
+			array( '@type' => 'ListItem', 'position' => 1, 'name' => 'Accueil', 'item' => home_url( '/' ) ),
+			array( '@type' => 'ListItem', 'position' => 2, 'name' => get_the_title( $object ), 'item' => get_permalink( $object ) ),
+		) );
+		echo '<script type="application/ld+json">' . wp_json_encode( $discussion, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE ) . '</script>' . "\n";
+		echo '<script type="application/ld+json">' . wp_json_encode( $breadcrumb, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE ) . '</script>' . "\n";
+	}
+}, 1 );

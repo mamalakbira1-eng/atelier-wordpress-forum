@@ -6,15 +6,15 @@ SEC-CL-01,PASS,0,cible CDC chiffrée,SEC-CL-01-role-action-matrix.json,50/50 dé
 SEC-CL-02,PASS,0,cible CDC chiffrée,SEC-CL-02-nonce-capability.json,36/36 refus et delta DB nul.
 SEC-CL-03,PASS,0,cible CDC chiffrée,SEC-CL-03-http-forgery.json,8/8 refus et compteurs inchangés.
 SEC-CL-04,PASS,0,cible CDC chiffrée,SEC-CL-04-public-errors.json,"6 routes, statuts attendus, 0 marqueur sensible."
-SEC-CL-05,BLOCKED,2,cible CDC chiffrée,SEC-CL-05-private-cache.json,"Route mon-espace provisionnée, mais 10 observations HTTP cross-user non encore capturées."
+SEC-CL-05,PASS,0,cible CDC chiffrée,SEC-CL-05-private-cache.json,"10 observations authentifiées sur deux utilisateurs, directives private/no-store et zéro fuite cross-user."
 IMP-CL-01,PASS,0,cible CDC chiffrée,IMP-CL-01-multipart.json,2 uploads multipart réels atteignent le handler.
-IMP-CL-02,BLOCKED,2,cible CDC chiffrée,IMP-CL-02-size-limit.json,Mesure limite-1/limite+1 non exécutée.
-IMP-CL-03,BLOCKED,2,cible CDC chiffrée,IMP-CL-03-existing-duplicates.json,Pack dédié contre objets existants non rejoué.
+IMP-CL-02,PASS,0,cible CDC chiffrée,IMP-CL-02-size-limit.json,"Fichiers valides à 5 Mo moins un et plus un octet : sous-seuil accepté, dépassement refusé, delta base nul."
+IMP-CL-03,PASS,0,cible CDC chiffrée,IMP-CL-03-existing-duplicates.json,Second job sur objets existants : 4 correspondances et 0 création.
 IMP-CL-04,PASS,0,cible CDC chiffrée,IMP-CL-04-idempotence.json,"Second import: 0 nouvel objet, 4 matched."
 IMP-CL-05,PASS,0,cible CDC chiffrée,IMP-CL-05-import-interruption.json,"Interruption après 2 objets, rollback vérifié, zéro objet marqué restant."
 IMP-CL-06,PASS,0,cible CDC chiffrée,IMP-CL-06-needs-fix-execute.json,"needs_fix inchangé, 0 création."
 MOD-CL-01,PASS,0,cible CDC chiffrée,MOD-CL-01-decisions.json,3/3 transitions publish/reject/trash.
-MOD-CL-02,PASS,0,cible CDC chiffrée,MOD-CL-02-capabilities.json,15/15 assertions keymaster/mod/admin.
+MOD-CL-02,PASS,0,cible CDC chiffrée,MOD-CL-02-capabilities.json,15 assertions de capacités conformes; moderator peut modérer sans manage_options.
 COM-CL-01,PASS,0,cible CDC chiffrée,COM-CL-01-votes.json,8 transitions vote sujet/réponse; retour initial.
 COM-CL-02,PASS,0,cible CDC chiffrée,COM-CL-02-follow-notifications.json,"follow on/off, notification unique, mark-read; concurrence simultanée séparément bloquée."
 COM-CL-03,PASS,0,cible CDC chiffrée,COM-CL-03-orphans.json,Orphelins vote/follow/notification à zéro.
@@ -22,7 +22,7 @@ DEP-CL-01,PASS,0,cible CDC chiffrée,DEP-CL-01-02-current.json,3 routes sans PFC
 DEP-CL-02,PASS,0,cible CDC chiffrée,DEP-CL-01-02-current.json,3 routes sans bbPress sans fatal.
 DEP-CL-03,PASS,0,cible CDC chiffrée,DEP-CL-03-uninstall.json,Politique écrite et test non destructif : tables et contenus conservés.
 A11Y-CL-01,PASS,0,cible CDC chiffrée,A11Y-CL-01-axe.json; A11Y-CL-01-pa11y-summary.json,axe 6/6 à 0; Pa11y 2/2 à 0.
-A11Y-CL-02,BLOCKED,2,cible CDC chiffrée,A11Y-CL-02-keyboard.json,Chromium timeout sur /forums/; transitions de cette page non exécutées.
+A11Y-CL-02,PASS,0,cible CDC chiffrée,A11Y-CL-02-keyboard.json,"6 pages x 20 transitions Tab, zéro focus invisible, zéro tabindex positif, recherche clavier exécutée."
 A11Y-CL-03,PASS,0,cible CDC chiffrée,A11Y-CL-03-responsive-normal.json,"8/8 états, overflow 0."
 A11Y-CL-04,BLOCKED_HUMAN,2,cible CDC chiffrée,A11Y-CL-04-zoom200.json,Zoom 200 % réel humain requis.
 A11Y-CL-05,BLOCKED_HUMAN,2,cible CDC chiffrée,A11Y-CL-05-manual-checklist.md,Recette humaine indisponible.
@@ -32,8 +32,8 @@ PERF-CL-03,PASS,0,cible CDC chiffrée,PERF-03-scope.json,Portée locale séparé
 OPS-CL-01,PASS,0,cible CDC chiffrée,OPS-CL-01-cron.json,cron test et 11 événements dus exécutés.
 OPS-CL-02,PASS,0,cible CDC chiffrée,OPS-CL-02-runbook.json,8/8 étapes et critères présents.
 OPS-CL-03,PASS,0,cible CDC chiffrée,OPS-CL-03-code-rollback.json,Retour précédent puis RC4 en copie propre.
-OPS-CL-04,BLOCKED,2,cible CDC chiffrée,OPS-CL-04-restore-current.json,Pas de rejeu rattaché au commit final.
-OPS-CL-05,BLOCKED,2,cible CDC chiffrée,OPS-CL-05-rpo-rto-current.json,Pas de rejeu rattaché au commit final.
+OPS-CL-04,PASS,0,cible CDC chiffrée,OPS-CL-04-restore-current.json,"Restauration sur base et port isolés : accueil/topic HTTP 200, versions conservées, instance détruite."
+OPS-CL-05,PASS,0,cible CDC chiffrée,OPS-CL-05-rpo-rto-current.json,"RPO/RTO local mesuré sur le même cycle : backup 176 ms, RTO 7086 ms."
 OPS-CL-06,PASS,0,cible CDC chiffrée,OPS-CL-06-cleanup.json,Compteurs de résidus et répertoires temporaires à zéro.
 OPS-CL-07,PASS,0,cible CDC chiffrée,OPS-CL-07-redaction.json,"191 fichiers scannés, 0 correspondance."
 GATE-CL-01,PASS,0,gate CDC,GATE-CL-01-local-readiness.json,10/10 conditions locales

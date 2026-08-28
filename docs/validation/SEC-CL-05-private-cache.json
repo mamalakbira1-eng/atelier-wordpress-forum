@@ -1,0 +1,100 @@
+{
+    "objective": "SEC-CL-05",
+    "target": "10 observations, private\/no-store conforme, 0 fuite cross-user",
+    "logins": {
+        "cdc_admin": {
+            "ok": true,
+            "status": 200
+        },
+        "cdc_member": {
+            "ok": true,
+            "status": 200
+        }
+    },
+    "observations": [
+        {
+            "status": 200,
+            "cache_control": "no-cache, must-revalidate, max-age=0, no-store, private",
+            "body_hash": "8460868505873389df7f3e742d4cc0a156091205a0ee1c778c9caad17aa5a3e4",
+            "body_bytes": 31878,
+            "user": "cdc_admin",
+            "url": "\/mon-espace\/"
+        },
+        {
+            "status": 200,
+            "cache_control": "no-cache, must-revalidate, max-age=0, no-store, private",
+            "body_hash": "23dd021d8701b53f42886867ae7d4b5d4465c50650056fa94f700f4859b53f5b",
+            "body_bytes": 76397,
+            "user": "cdc_admin",
+            "url": "\/wp-admin\/"
+        },
+        {
+            "status": 200,
+            "cache_control": "no-cache, must-revalidate, max-age=0, no-store, private",
+            "body_hash": "c10e404368d40b66676db3b02ace653b709abc42f675ee3787b5fe36c7f5f64e",
+            "body_bytes": 70914,
+            "user": "cdc_admin",
+            "url": "\/wp-admin\/profile.php"
+        },
+        {
+            "status": 200,
+            "cache_control": "no-cache, must-revalidate, max-age=0, no-store, private",
+            "body_hash": "41685e683ff905aad650934275b005a77c078853f587551022842bf4fdf3ca05",
+            "body_bytes": 76451,
+            "user": "cdc_admin",
+            "url": "\/wp-admin\/index.php"
+        },
+        {
+            "status": 302,
+            "cache_control": "no-cache, must-revalidate, max-age=0, no-store, private",
+            "body_hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "body_bytes": 0,
+            "user": "cdc_admin",
+            "url": "\/wp-login.php"
+        },
+        {
+            "status": 200,
+            "cache_control": "no-cache, must-revalidate, max-age=0, no-store, private",
+            "body_hash": "38fc3e0530ca707b73c5c772e75003832223e19d0b560bff48bad31c566ea12b",
+            "body_bytes": 30128,
+            "user": "cdc_member",
+            "url": "\/mon-espace\/"
+        },
+        {
+            "status": 200,
+            "cache_control": "no-cache, must-revalidate, max-age=0, no-store, private",
+            "body_hash": "7727d3b84836325b16b46374202c75fc8a57d94aca3d5441e99d78ac1bb9825f",
+            "body_bytes": 44393,
+            "user": "cdc_member",
+            "url": "\/wp-admin\/"
+        },
+        {
+            "status": 200,
+            "cache_control": "no-cache, must-revalidate, max-age=0, no-store, private",
+            "body_hash": "82fff599cb9630e34bb8fbae0ac2f975234f406f5c610376d754036063ab256b",
+            "body_bytes": 47207,
+            "user": "cdc_member",
+            "url": "\/wp-admin\/profile.php"
+        },
+        {
+            "status": 200,
+            "cache_control": "no-cache, must-revalidate, max-age=0, no-store, private",
+            "body_hash": "5cb409523a901db93a1051d8ceca638668c7c8675417b588984be8a07895577f",
+            "body_bytes": 44411,
+            "user": "cdc_member",
+            "url": "\/wp-admin\/index.php"
+        },
+        {
+            "status": 302,
+            "cache_control": "no-cache, must-revalidate, max-age=0, no-store, private",
+            "body_hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "body_bytes": 0,
+            "user": "cdc_member",
+            "url": "\/wp-login.php"
+        }
+    ],
+    "cross_user_leaks": [],
+    "exit_code": 0,
+    "status": "PASS",
+    "blocked_reason": null
+}

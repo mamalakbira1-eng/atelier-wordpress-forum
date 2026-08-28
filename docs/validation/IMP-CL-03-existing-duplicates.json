@@ -1,0 +1,72 @@
+{
+    "objective": "IMP-CL-03",
+    "target": "collision pack after existing objects: 0 creation, 4 correspondances",
+    "jobs": {
+        "initial": 96,
+        "collision": 97
+    },
+    "item_groups": [
+        {
+            "job_id": "96",
+            "object_type": "forum",
+            "action_name": "created",
+            "total": "1"
+        },
+        {
+            "job_id": "96",
+            "object_type": "reply",
+            "action_name": "created",
+            "total": "1"
+        },
+        {
+            "job_id": "96",
+            "object_type": "topic",
+            "action_name": "created",
+            "total": "1"
+        },
+        {
+            "job_id": "96",
+            "object_type": "user",
+            "action_name": "created",
+            "total": "1"
+        },
+        {
+            "job_id": "97",
+            "object_type": "forum",
+            "action_name": "matched",
+            "total": "1"
+        },
+        {
+            "job_id": "97",
+            "object_type": "reply",
+            "action_name": "matched",
+            "total": "1"
+        },
+        {
+            "job_id": "97",
+            "object_type": "topic",
+            "action_name": "matched",
+            "total": "1"
+        },
+        {
+            "job_id": "97",
+            "object_type": "user",
+            "action_name": "matched",
+            "total": "1"
+        }
+    ],
+    "observed": {
+        "collision_created": 0,
+        "collision_matched": 4
+    },
+    "exit_code": 0,
+    "status": "PASS",
+    "commands": [
+        "test_import_nominal_local.php prepare\/dry\/execute x2",
+        "php tools\/finalize_existing_collision_proof_rc4.php INITIAL COLLISION"
+    ],
+    "artifacts": [
+        "IMP-CL-03-existing-duplicates.json"
+    ],
+    "blocked_reason": null
+}

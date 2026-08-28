@@ -1,0 +1,128 @@
+{
+    "objective": "MOD-CL-02",
+    "timestamp_utc": "2026-08-28T01:31:41+00:00",
+    "commit": "63b3314111de85a343875ef2b45b2bfecf659c9d",
+    "environment": "local-8090",
+    "target": "3 rôles x 5 assertions = 15; modérateur sans manage_options",
+    "observed": {
+        "total": 15,
+        "conforming": 15,
+        "rows": [
+            {
+                "role": "keymaster",
+                "assertion": "queue",
+                "expected": false,
+                "observed": false,
+                "exit_code": 0
+            },
+            {
+                "role": "keymaster",
+                "assertion": "publish",
+                "expected": false,
+                "observed": false,
+                "exit_code": 0
+            },
+            {
+                "role": "keymaster",
+                "assertion": "reject",
+                "expected": false,
+                "observed": false,
+                "exit_code": 0
+            },
+            {
+                "role": "keymaster",
+                "assertion": "trash",
+                "expected": false,
+                "observed": false,
+                "exit_code": 0
+            },
+            {
+                "role": "keymaster",
+                "assertion": "manage_options",
+                "expected": false,
+                "observed": false,
+                "exit_code": 0
+            },
+            {
+                "role": "moderator",
+                "assertion": "queue",
+                "expected": true,
+                "observed": true,
+                "exit_code": 0
+            },
+            {
+                "role": "moderator",
+                "assertion": "publish",
+                "expected": true,
+                "observed": true,
+                "exit_code": 0
+            },
+            {
+                "role": "moderator",
+                "assertion": "reject",
+                "expected": true,
+                "observed": true,
+                "exit_code": 0
+            },
+            {
+                "role": "moderator",
+                "assertion": "trash",
+                "expected": true,
+                "observed": true,
+                "exit_code": 0
+            },
+            {
+                "role": "moderator",
+                "assertion": "manage_options",
+                "expected": false,
+                "observed": false,
+                "exit_code": 0
+            },
+            {
+                "role": "administrator",
+                "assertion": "queue",
+                "expected": true,
+                "observed": true,
+                "exit_code": 0
+            },
+            {
+                "role": "administrator",
+                "assertion": "publish",
+                "expected": true,
+                "observed": true,
+                "exit_code": 0
+            },
+            {
+                "role": "administrator",
+                "assertion": "reject",
+                "expected": true,
+                "observed": true,
+                "exit_code": 0
+            },
+            {
+                "role": "administrator",
+                "assertion": "trash",
+                "expected": true,
+                "observed": true,
+                "exit_code": 0
+            },
+            {
+                "role": "administrator",
+                "assertion": "manage_options",
+                "expected": true,
+                "observed": true,
+                "exit_code": 0
+            }
+        ],
+        "temporary_keymaster_removed": true
+    },
+    "exit_code": 0,
+    "status": "PASS",
+    "commands": [
+        "php tools\/test_moderation_capabilities_rc4.php"
+    ],
+    "artifacts": [
+        "MOD-CL-02-capabilities.json"
+    ],
+    "blocked_reason": null
+}
