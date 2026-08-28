@@ -1,0 +1,48 @@
+# CDC RC5 — Matrice d’objectifs strictement mesurables
+
+## Règle universelle des exits
+
+`exit 0` signifie **PASS** : toutes les mesures de la cible sont atteintes et la preuve est complète. `exit 1` signifie **FAIL** : le test a pu s’exécuter, mais au moins une mesure ou une règle est violée. `exit 2` signifie **BLOCKED** : l’environnement empêche une exécution valide ; la cause, le prérequis manquant et l’action de déblocage sont obligatoires dans la preuve. `exit 3` signifie **TEST_ERROR** : le runner ou la fixture est défaillant ; ce code impose la correction du test avant toute décision. Aucun `BLOCKED` ou `TEST_ERROR` ne peut être compté comme PASS.
+
+## Matrice contractuelle
+
+| ID | Cible chiffrée | Preuve obligatoire | Exit PASS = 0 | Exit FAIL = 1 | Règle BLOCKED = 2 |
+|---|---|---|---|---|---|
+| `IMG-01` | 2/2 formulaires, sujet et réponse, sont multipart et possèdent un champ image labellisé | HTML capturé + `IMG-01.json` | Champs, labels, `enctype` et limites présents dans 2/2 | Un élément manque dans au moins 1 formulaire | bbPress/templates indisponibles ou non chargés ; documenter URL et prérequis |
+| `IMG-02` | 3/3 rôles synthétiques testés : membre, modérateur, administrateur | `IMG-02-roles.json` avec user IDs anonymisés | Les 3 capacités correspondent à la politique | Au moins 1 rôle obtient une capacité interdite | Moins de 3 comptes isolés disponibles |
+| `IMG-03` | 10/10 nonces absents ou invalides refusés ; 0 fichier créé | Requêtes, réponses et compteurs dans `IMG-03-nonce.json` | 10 refus, delta attachments = 0 | Une requête passe ou crée un fichier | Endpoint non invocable de façon sûre |
+| `IMG-04` | 8/8 capacités ou parents forgés refusés ; 0 attachment étranger | `IMG-04-parent-capability.json` | 8 refus et 0 rattachement hors parent | Une image est rattachée au mauvais post | Rôles ou parent isolé non provisionnables |
+| `IMG-05` | 5 entrées testées ; JPEG, PNG, WebP réels acceptés, 2 falsifications refusées | Fixtures hashées + `IMG-05-mime.json` | 3 acceptations et 2 refus exacts | MIME falsifié accepté ou format autorisé refusé sans politique | `finfo`/moteur image indisponible |
+| `IMG-06` | 5 frontières : taille -1, taille exacte, taille +1, dimension -1, dimension +1 | `IMG-06-boundaries.json` | Réponses conformes aux 5 frontières, delta métier nul sur refus | Une frontière est incorrecte ou produit une mutation | PHP/webserver bloque avant le handler sans observation exploitable |
+| `IMG-07` | 6 fichiers dangereux refusés : SVG, PHP, HTML, JS, ZIP, MIME incohérent | Fixtures + scan public + `IMG-07-dangerous.json` | 6/6 refus et 0 fichier exécutable/public | Un fichier dangereux est accepté ou servi | Filtrage amont sans log ni preuve récupérable |
+| `IMG-08` | 10 images valides décodées, dont 2 transparentes et 2 haute définition sous limite | `IMG-08-decode.json` avec dimensions avant/après | 10/10 décodées et dimensions conformes | Une image est tronquée, corrompue ou mal dimensionnée | Aucun moteur compatible avec une entrée exigée |
+| `IMG-09` | 10/10 sorties AVIF présentes, MIME `image/avif`, non vides et décodables | Hash, taille, MIME, dimensions et relecture dans `IMG-09-avif.json` | 10/10 vérifications réussies et attachment correct | AVIF absent, illisible, vide ou mal associé | Aucun support AVIF réel ; l’option doit être désactivée, pas déclarée PASS |
+| `IMG-10` | 5 échecs de conversion injectés ; 5/5 rejets propres et original préservé | Log d’injection + `IMG-10-failure.json` | 0 publication partielle, 0 AVIF cassé, fallback intact | Fichier orphelin, publication partielle ou original perdu | Aucun point d’injection contrôlé |
+| `IMG-11` | 10 publications : 5 sujets + 5 réponses ; 10/10 images visibles après publication | IDs, URLs, HTTP, captures dans `IMG-11-render.json` | 10/10 HTTP 200 et parent correct | Une image manque, fuit ou appartient au mauvais parent | Publication synthétique impossible |
+| `IMG-12` | 5 contenus `pending` ; 0/5 image accessible publiquement avant modération | Requêtes anonyme/auteur/modérateur dans `IMG-12-pending.json` | 0 fuite et accès conforme à la politique | Une URL publique permet l’accès prématuré | Aucun stockage privé ou contrôle d’accès disponible |
+| `IMG-13` | 5 transitions `pending`→`publish` ; 5/5 images deviennent accessibles après approbation | Avant/après + `IMG-13-transition.json` | Les 5 transitions et permissions sont correctes | Image visible trop tôt ou encore cassée après publication | Moteur de modération non pilotable isolément |
+| `IMG-14` | 5 contenus rejetés/supprimés ; 0 temporaire, 0 attachment et 0 fichier orphelin après nettoyage | Scan ciblé + `IMG-14-cleanup.json` | Tous les compteurs d’orphelins valent 0 | Au moins 1 orphelin ou nettoyage non idempotent | Nettoyeur/cron non déclenchable et absence de mode manuel sûr |
+| `IMG-15` | 5 doubles soumissions identiques ; maximum 1 attachment logique par image | Hash d’entrée et liste des attachments dans `IMG-15-idempotence.json` | 5/5 sans doublon non justifié | Au moins 1 double attachment | Soumission atomique non simulable |
+| `IMG-16` | 10 images : 5 alt fournis, 5 absents ; 10/10 `alt` non vides et échappés | HTML final + `IMG-16-alt.json` | 10/10 alt conformes et utiles | Alt vide, non échappé ou chemin brut seul | Rendu final inaccessible |
+| `IMG-17` | 4 largeurs × 2 états JS = 8 vues ; 0 débordement et 0 contrôle inaccessible | Captures et mesures dans `IMG-17-responsive.json` | 8/8 utilisables à 320, 768, 1024, 1440 px | Une vue casse le contenu ou le contrôle | Navigateur contrôlé indisponible |
+| `IMG-18` | 3 carrousels LTR + 3 RTL ; 6/6 ordre, légendes et commandes corrects | Captures + mesures dans `IMG-18-rtl.json` | 6/6 rendus cohérents | Inversion, superposition ou légende incorrecte | Fixture RTL ou poste de test indisponible |
+| `IMG-19` | 6 carrousels : 2 images et 3 images, clavier, tactile et sans JS ; 18 parcours conformes | `IMG-19-carousel-a11y.json` + checklist | 18/18 parcours, focus et annonces conformes | Un parcours bloque, piège le focus ou perd une image | Matériel tactile/recette humaine indisponible |
+| `IMG-20` | 40 actions de quota : 4 utilisateurs × 10 images acceptées, puis 4 dépassements refusés | Compteurs UTC, requêtes et deltas dans `IMG-20-quota.json` | 40 acceptations, 4 refus, 0 mutation sur dépassement | Quota contournable, partagé entre users ou mal compté | 4 comptes isolés ou horloge UTC contrôlable indisponibles |
+| `IMG-21` | 6 soumissions de 0,1,2,3,4,5 images ; 0–3 selon politique, 4–5 rejetées atomiquement | `IMG-21-publication-limit.json` | Résultats exacts, 0 temporaire résiduel | 4 ou 5 images acceptées ou rejet partiel | Formulaire bbPress réel inaccessible |
+| `IMG-22` | 4 tentatives à quota restant 0,1,2,3 avec soumission de 3 images | `IMG-22-quota-atomicity.json` | 0,1,2 refus atomiques ; 3 acceptées | Fichiers partiels ou compteur incohérent | Compteur serveur non observable |
+| `IMG-23` | 10 originaux soumis ; suppression différée seulement après 10/10 validations AVIF | Journal de job + `IMG-23-retention.json` | Aucun original supprimé prématurément ; politique appliquée après délai | Original supprimé avant validation ou sans délai | Cron/stockage de rétention non contrôlable |
+| `IMG-24` | 1 sauvegarde et 1 restauration ; 10/10 invariants média conservés | `IMG-24-restore.json` : attachment, parent, URL, MIME, dimensions, AVIF, alt, statut, visibilité, nettoyage | 10/10 invariants concordants et 0 perte | Toute perte, divergence ou média cassé | Seconde instance ou sauvegarde complète absente |
+| `IMG-25` | 1 désactivation et 1 désinstallation ; 0 média métier supprimé implicitement | Logs, compteurs avant/après, `IMG-25-uninstall.json` | Données conservées et politique affichée | Média supprimé sans confirmation explicite | Désinstallation impossible sans risque sur instance de test |
+| `IMG-26` | 1 audit final ; 0 secret, 0 exécutable, 0 warning PHP, 0 orphelin | Rapport de scan + lint + `IMG-26-final-audit.json` | 4 compteurs à 0 et tous runners exit 0 | Un seul compteur non nul | Logs ou filesystem réels inaccessibles |
+
+## Règles d’implémentation
+
+La limite de **3 images par publication** doit être appliquée côté serveur avant toute écriture définitive. Le quota par défaut est de **10 images par utilisateur et par jour UTC**, tous sujets et réponses confondus. Le compteur doit être atomique, rattaché à l’utilisateur authentifié et indépendant du navigateur. Une soumission refusée ne consomme rien ; une double soumission idempotente ne consomme qu’une fois.
+
+Le carrousel doit être rendu en galerie verticale de secours lorsque JavaScript est absent. Avec JavaScript, il doit exposer un nom accessible, une position `x sur y`, des boutons précédent/suivant, des contrôles clavier, un fonctionnement tactile et un comportement RTL. Les images doivent avoir des dimensions explicites, utiliser une taille dérivée et charger paresseusement sauf la première visible.
+
+La suppression de l’original n’est jamais une étape de conversion immédiate. Elle est une étape différée, réversible et journalisée. En cas d’échec de conversion, l’original est conservé ou toute la publication est rejetée atomiquement. La désinstallation du plugin ne supprime pas les médias métier par défaut.
+
+## Décision de release
+
+La release obtient **GO** seulement si `IMG-01` à `IMG-26` sont tous `exit 0`, si la régression RC4 reste à zéro, si l’archive et le SHA du code testé sont publiés et si les preuves sont présentes. Un seul `exit 1` impose **NO-GO**. Un `exit 2` impose **NO-GO conditionnel** jusqu’à déblocage. Un `exit 3` impose l’arrêt de la campagne et la correction du dispositif de test.
