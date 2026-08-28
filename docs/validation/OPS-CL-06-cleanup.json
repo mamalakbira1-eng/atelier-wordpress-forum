@@ -1,0 +1,26 @@
+{
+    "objective": "OPS-CL-06",
+    "timestamp_utc": "2026-08-28T00:54:08+00:00",
+    "commit": "89aba3b5ae727c2818ac513739c9faf4553bd3e1",
+    "environment": "local-8090",
+    "target": "six compteurs de résidus et fichiers temporaires à zéro",
+    "observed": {
+        "cdc_users": 0,
+        "cdc_posts": 0,
+        "import_jobs": 0,
+        "import_items": 0,
+        "community_votes": 0,
+        "community_follows": 0,
+        "community_notifications": 0,
+        "import_temp_dirs": 0
+    },
+    "exit_code": 0,
+    "status": "PASS",
+    "commands": [
+        "php tools\/final_cleanup_rc4.php"
+    ],
+    "artifacts": [
+        "OPS-CL-06-cleanup.json"
+    ],
+    "blocked_reason": null
+}
