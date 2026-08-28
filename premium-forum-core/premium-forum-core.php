@@ -2,7 +2,7 @@
 /**
  * Plugin Name: Premium Forum Core
  * Description: SEO LLM-first, profils, compteurs historiques et migration CSV sécurisée pour bbPress.
- * Version: 0.4.19
+ * Version: 0.4.20
  * Requires at least: 6.4
  * Requires PHP: 8.1
  * Requires Plugins: bbpress
@@ -11,7 +11,7 @@
 
 defined( 'ABSPATH' ) || exit;
 
-define( 'PFC_VERSION', '0.4.19' );
+define( 'PFC_VERSION', '0.4.20' );
 define( 'PFC_FILE', __FILE__ );
 define( 'PFC_DIR', plugin_dir_path( __FILE__ ) );
 define( 'PFC_URL', plugin_dir_url( __FILE__ ) );
@@ -22,6 +22,7 @@ require_once PFC_DIR . 'includes/class-pfc-seo.php';
 require_once PFC_DIR . 'includes/class-pfc-community.php';
 require_once PFC_DIR . 'includes/class-pfc-registration.php';
 require_once PFC_DIR . 'includes/class-pfc-moderation.php';
+require_once PFC_DIR . 'includes/class-pfc-media.php';
 
 /**
  * Staging hardening: Atelier does not use the legacy XML-RPC API or
